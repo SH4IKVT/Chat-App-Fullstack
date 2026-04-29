@@ -17,7 +17,11 @@ export class DashboardComponent implements OnInit {
   users: any[] = [];
   loading = false;
 
-  constructor(private router: Router, private auth: AuthService,private cd: ChangeDetectorRef) {
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+    private cd: ChangeDetectorRef
+  ) {
     this.role = localStorage.getItem('role') || 'User';
   }
 
@@ -26,25 +30,26 @@ export class DashboardComponent implements OnInit {
     this.loadUsers();
   }
 
-  loadUsers() {
-    console.log("Calling API...");
+  logout() {
+    localStorage.clear();
+    this.router.navigate(['/']);
+  }
 
+  loadUsers() {
     this.loading = true;
 
     this.auth.getUsers().subscribe({
-      next: (res: any) => {
+      next: (res: any[]) => {
         console.log("Users:", res);
 
         this.users = [...res];
         this.loading = false;
-
-        this.cd.detectChanges();   // 👈 FORCE UI UPDATE
+        this.cd.detectChanges();
       },
       error: (err) => {
         console.error(err);
         this.loading = false;
-
-        this.cd.detectChanges();   // 👈 ALSO HERE
+        this.cd.detectChanges();
       }
     });
   }
@@ -61,7 +66,22 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  goToChat() {
+  // 🔥 NEW: MESSAGE SINGLE USER
+  messageUser(email: string) {
+    console.log("Message user:", email);
+
+    // store selected user (for chat page later)
+    localStorage.setItem('chatUser', email);
+
+    this.router.navigate(['/chat']);
+  }
+
+  // 🔥 NEW: MESSAGE ALL USERS
+  messageAll() {
+    console.log("Message ALL users");
+
+    localStorage.setItem('chatUser', 'ALL');
+
     this.router.navigate(['/chat']);
   }
 }

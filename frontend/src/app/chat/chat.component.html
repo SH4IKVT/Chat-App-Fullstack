@@ -1,10 +1,29 @@
-<div *ngFor="let msg of messages">
-  <div [ngClass]="msg.type === 'sent' ? 'right' : 'left'">
-    <strong>{{msg.user}}</strong>
-    <p>{{msg.text}}</p>
-    <small>{{msg.time}}</small>
-  </div>
-</div>
+<div class="chat-container">
 
-<input [(ngModel)]="message">
-<button (click)="send()">Send</button>
+  <div class="chat-header">
+    <button class="close-btn" (click)="closeChat()"><</button>
+    <h3 class="usr-name">{{chatUser}}</h3>
+    <hr>
+  </div>
+
+  <div class="chat-body">
+    <div *ngIf="messages.length === 0" class="empty">
+      No messages yet
+    </div>
+
+    <div *ngFor="let msg of messages"
+         [ngClass]="{'message': true, 'sent': msg.sender === 'me'}">
+      {{msg.text}}
+    </div>
+  </div>
+
+  <div class="chat-footer">
+    <input
+      type="text"
+      [(ngModel)]="newMessage"
+      placeholder="Type a message..."
+    />
+    <button (click)="sendMessage()">Send</button>
+  </div>
+
+</div>
