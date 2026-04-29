@@ -3,7 +3,9 @@ using ChatApplication.Models;
 using System.Text;
 using System.Text.Json;
 using BCrypt.Net;
-
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 namespace ChatApplication.Controllers
 {
     [ApiController]
@@ -61,53 +63,96 @@ namespace ChatApplication.Controllers
         // ===========================
         // 🔥 LOGIN
         // ===========================
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest req)
-        {
-            try
+            [HttpPost("login")]
+            public async Task<IActionResult> Login([FromBody] LoginRequest req)
             {
-                var response = await _http.GetAsync($"http://localhost:5984/userdb/{req.Email}");
-
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    var data = await response.Content.ReadAsStringAsync();
-                    var user = JsonSerializer.Deserialize<User>(data);
+                    var response = await _http.GetAsync($"http://localhost:5984/userdb/{req.Email}");
 
-                    if (user == null)
-                        return Unauthorized(new { message = "Invalid credentials" });
-
-                    if (!BCrypt.Net.BCrypt.Verify(req.Password, user.Password))
-                        return Unauthorized(new { message = "Invalid credentials" });
-
-                    if (user.Status != "approved")
-                        return BadRequest(new { message = "User not approved yet" });
-
-                    return Ok(new
+                    // 🔥 USER LOGIN
+                    if (response.IsSuccessStatusCode)
                     {
-                        role = user.Role,
-                        name = user.FirstName + " " + user.LastName,
-                        email = user.Email
-                    });
-                }
+                        var data = await response.Content.ReadAsStringAsync();
+                        var user = JsonSerializer.Deserialize<User>(data);
 
-                if (req.Email == "admin@gmail.com" && req.Password == "123")
+                        if (user == null)
+                            return Unauthorized(new { message = "Invalid credentials" });
+
+                        if (!BCrypt.Net.BCrypt.Verify(req.Password, user.Password))
+                            return Unauthorized(new { message = "Invalid credentials" });
+
+                        if (user.Status != "approved")
+                            return BadRequest(new { message = "User not approved yet" });
+
+                        // 🔥 JWT GENERATION
+                        var key = "THIS_IS_MY_SUPER_SECRET_KEY_12345";
+
+                        var claims = new[]
+                        {
+                            new Claim(ClaimTypes.Name, user.Email),
+                            new Claim(ClaimTypes.Role, user.Role)
+                        };
+
+                        var token = new JwtSecurityToken(
+                            claims: claims,
+                            expires: DateTime.Now.AddHours(2),
+                            signingCredentials: new SigningCredentials(
+                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+                                SecurityAlgorithms.HmacSha256
+                            )
+                        );
+
+                        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                        return Ok(new
+                        {
+                            token = tokenString,
+                            role = user.Role,
+                            name = user.FirstName + " " + user.LastName,
+                            email = user.Email
+                        });
+                    }
+
+                    // 🔥 ADMIN LOGIN
+                    if (req.Email == "admin@gmail.com" && req.Password == "123")
+                    {
+                        var key = "THIS_IS_MY_SUPER_SECRET_KEY_12345";
+
+                        var claims = new[]
+                        {
+                            new Claim(ClaimTypes.Name, "admin@gmail.com"),
+                            new Claim(ClaimTypes.Role, "Admin")
+                        };
+
+                        var token = new JwtSecurityToken(
+                            claims: claims,
+                            expires: DateTime.Now.AddHours(2),
+                            signingCredentials: new SigningCredentials(
+                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+                                SecurityAlgorithms.HmacSha256
+                            )
+                        );
+
+                        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                        return Ok(new
+                        {
+                            token = tokenString,
+                            role = "Admin",
+                            name = "Admin User",
+                            email = "admin@gmail.com"
+                        });
+                    }
+
+                    return Unauthorized(new { message = "Invalid credentials" });
+                }
+                catch (Exception ex)
                 {
-                    return Ok(new
-                    {
-                        role = "Admin",
-                        name = "Admin User",
-                        email = "admin@gmail.com"
-                    });
+                    Console.WriteLine("Login error: " + ex.Message);
+                    return StatusCode(500, new { message = "Server error" });
                 }
-
-                return Unauthorized(new { message = "Invalid credentials" });
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Login error: " + ex.Message);
-                return StatusCode(500, new { message = "Server error" });
-            }
-        }
 
         // ===========================
         // 🔥 FIXED GET USER (IMPORTANT)

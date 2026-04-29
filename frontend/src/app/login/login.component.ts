@@ -42,6 +42,7 @@ export class LoginComponent {
         console.log("Login success", res);
 
         this.loading = false;
+        localStorage.setItem('token', res.token);
 
         // ✅ Store role from backend
         localStorage.setItem('role', res.role);
