@@ -1,0 +1,10 @@
+<div *ngFor="let msg of messages">
+  <div [ngClass]="msg.type === 'sent' ? 'right' : 'left'">
+    <strong>{{msg.user}}</strong>
+    <p>{{msg.text}}</p>
+    <small>{{msg.time}}</small>
+  </div>
+</div>
+
+<input [(ngModel)]="message">
+<button (click)="send()">Send</button>

@@ -1,0 +1,14 @@
+<h2>Signup</h2>
+
+<input [(ngModel)]="user.firstName" placeholder="First Name">
+<input [(ngModel)]="user.lastName" placeholder="Last Name">
+<input [(ngModel)]="user.email" placeholder="Email">
+<input [(ngModel)]="user.password" type="password" placeholder="Password">
+
+<button (click)="register()">Register</button>
+
+<!-- ✅ SUCCESS MESSAGE -->
+<p style="color: green;" *ngIf="successMsg">{{successMsg}}</p>
+
+<!-- ❌ ERROR MESSAGE -->
+<p style="color: red;" *ngIf="errorMsg">{{errorMsg}}</p>

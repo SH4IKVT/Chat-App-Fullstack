@@ -1,0 +1,82 @@
+<div class="dashboard">
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h2>Dashboard</h2>
+    <p class="role">Role: {{role}}</p>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div *ngIf="role === 'Admin'; else userView" class="admin-section">
+
+    <h3 class="section-title">Admin Panel</h3>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="info-box">
+      Loading users...
+    </div>
+
+    <!-- No Users -->
+    <div *ngIf="!loading && users.length === 0" class="info-box">
+      No users found.
+    </div>
+
+    <!-- USERS -->
+    <div *ngIf="!loading && users.length > 0" class="user-list">
+
+      <div *ngFor="let user of users" class="user-card">
+
+        <div class="user-header">
+          <h4>{{user.firstName}} {{user.lastName}}</h4>
+          <span class="status"
+            [ngClass]="{
+              'approved': user.status === 'approved',
+              'pending': user.status === 'pending',
+              'rejected': user.status === 'rejected'
+            }">
+            {{user.status}}
+          </span>
+        </div>
+
+        <div class="user-details">
+          <p><b>Email:</b> {{user.email}}</p>
+          <p><b>Role:</b> {{user.role}}</p>
+        </div>
+
+        <div class="actions">
+          <button 
+            class="approve-btn"
+            (click)="approve(user.email)" 
+            [disabled]="user.status === 'approved'">
+            Approve
+          </button>
+
+          <button 
+            class="reject-btn"
+            (click)="reject(user.email)" 
+            [disabled]="user.status === 'rejected'">
+            Reject
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- USER PANEL -->
+  <ng-template #userView>
+    <div class="user-panel">
+      <h3>User Panel</h3>
+      <p>You are logged in as a User.</p>
+      <p>Waiting for admin approval...</p>
+    </div>
+  </ng-template>
+
+  <!-- Footer Button -->
+  <div class="footer">
+    <button class="chat-btn" (click)="goToChat()">Go to Notice Board</button>
+  </div>
+
+</div>

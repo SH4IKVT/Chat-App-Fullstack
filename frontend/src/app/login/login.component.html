@@ -1,0 +1,20 @@
+<div class="login-container">
+
+  <div class="login-card">
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Sign in to your account</p>
+
+    <input [(ngModel)]="loginData.email" placeholder="Email">
+    <input [(ngModel)]="loginData.password" type="password" placeholder="Password">
+
+    <select [(ngModel)]="loginData.role">
+      <option value="User">Login as User</option>
+      <option value="Admin">Login as Admin</option>
+    </select>
+
+    <button (click)="login()">Login</button>
+
+    <p class="error" *ngIf="errorMsg">{{errorMsg}}</p>
+  </div>
+
+</div>

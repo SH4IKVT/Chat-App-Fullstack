@@ -1,0 +1,33 @@
+<div class="ud-container">
+
+  <div *ngIf="loading">
+    Loading user...
+  </div>
+
+  <div *ngIf="!loading && errorMsg">
+    {{errorMsg}}
+  </div>
+
+  <div *ngIf="!loading && user">
+
+    <h2>User Dashboard</h2>
+
+    <p><b>Name:</b> {{user?.name}}</p>
+    <p><b>Email:</b> {{user?.email}}</p>
+    <p><b>Role:</b> {{user?.role}}</p>
+
+    <div class="ud-row">
+      <span>Status</span>
+      <span class="status"
+        [ngClass]="{
+          'approved': user?.status?.toLowerCase() === 'approved',
+          'pending': user?.status?.toLowerCase() === 'pending',
+          'rejected': user?.status?.toLowerCase() === 'rejected'
+        }">
+        {{user?.status}}
+      </span>
+    </div>
+
+  </div>
+
+</div>

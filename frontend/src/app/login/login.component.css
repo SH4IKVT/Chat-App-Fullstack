@@ -1,0 +1,76 @@
+/* Full page background */
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card */
+.login-card {
+  background: #ffffff;
+  padding: 40px;
+  width: 320px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+/* Title */
+.login-card h2 {
+  margin-bottom: 5px;
+  color: #0f172a;
+}
+
+/* Subtitle */
+.subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 25px;
+}
+
+/* Inputs */
+.login-card input,
+.login-card select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #cbd5f5;
+  outline: none;
+  transition: 0.2s;
+}
+
+/* Input focus */
+.login-card input:focus,
+.login-card select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 5px rgba(59,130,246,0.3);
+}
+
+/* Button */
+.login-card button {
+  width: 100%;
+  padding: 10px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* Button hover */
+.login-card button:hover {
+  background: #2563eb;
+}
+
+/* Error */
+.error {
+  color: red;
+  font-size: 13px;
+  margin-top: 10px;
+}
