@@ -43,7 +43,7 @@ export class LoginComponent {
 
         this.loading = false;
         localStorage.setItem('token', res.token);
-
+        localStorage.setItem('sessionId', res.sessionId); 
         // ✅ Store role from backend
         localStorage.setItem('role', res.role);
         localStorage.setItem('name', res.name);
