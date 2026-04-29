@@ -68,6 +68,11 @@ export class UserDashboardComponent implements OnInit {
   }
 
   messageUser(email: string) {
-    alert("Messaging " + email);
+   console.log("Message user:", email);
+
+    // store selected user (for chat page later)
+    localStorage.setItem('chatUser', email);
+
+    this.router.navigate(['/chat']);
   }
 }

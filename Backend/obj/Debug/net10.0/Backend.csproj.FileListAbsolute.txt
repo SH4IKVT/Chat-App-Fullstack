@@ -44,3 +44,4 @@ C:\Users\lenovo\Desktop\RBH\projects\ChatApplication\Backend\obj\Debug\net10.0\B
 C:\Users\lenovo\Desktop\RBH\projects\ChatApplication\Backend\obj\Debug\net10.0\Backend.genruntimeconfig.cache
 C:\Users\lenovo\Desktop\RBH\projects\ChatApplication\Backend\obj\Debug\net10.0\ref\Backend.dll
 C:\Users\lenovo\Desktop\RBH\projects\ChatApplication\Backend\bin\Debug\net10.0\BCrypt.Net-Next.dll
+C:\Users\lenovo\Desktop\RBH\projects\ChatApplication\Backend\bin\Debug\net10.0\Npgsql.dll

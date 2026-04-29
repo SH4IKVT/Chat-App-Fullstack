@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-chat',
@@ -13,62 +14,73 @@ import { FormsModule } from '@angular/forms';
 export class ChatComponent implements OnInit {
 
   chatUser: string = '';
-  messages: { text: string, sender: string }[] = [];
+  messages: any[] = [];
   newMessage: string = '';
 
-  constructor(private auth: AuthService, private cd: ChangeDetectorRef) {}
+  myEmail: string = '';
+  otherEmail: string = '';
+
+  constructor(
+    private auth: AuthService,
+    private cd: ChangeDetectorRef,
+    private http: HttpClient
+  ) {}
 
   ngOnInit() {
-    const email = localStorage.getItem('chatUser');
+    this.myEmail = localStorage.getItem('email') || '';
+    this.otherEmail = localStorage.getItem('chatUser') || '';
 
-    console.log("CHAT EMAIL:", email);
-
-    if (!email) {
+    if (!this.otherEmail) {
       this.chatUser = 'Unknown';
-      this.cd.detectChanges();
       return;
     }
 
-    // 🔥 HANDLE ALL USERS
-    if (email === 'ALL') {
-      this.chatUser = 'All Users';
-      this.cd.detectChanges();
-      return;
-    }
-
-    // 🔥 FETCH USER NAME FROM BACKEND
-    this.auth.getUserByEmail(email).subscribe({
+    // 🔥 get name
+    this.auth.getUserByEmail(this.otherEmail).subscribe({
       next: (res: any) => {
-        console.log("CHAT USER DATA:", res);
-
-        this.chatUser = res?.name || email;
-
-        // 🔥 FORCE UI UPDATE (THIS IS THE FIX)
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error("Chat fetch error:", err);
-
-        this.chatUser = email;
-
+        this.chatUser = res?.name || this.otherEmail;
         this.cd.detectChanges();
       }
     });
-  }
-  closeChat(){
-  localStorage.removeItem('chatUser');
-  // 🔥 navigate back to dashboard
-  window.location.href = '/dashboard';
+
+    this.loadMessages();
   }
 
+  // 🔥 LOAD FROM DB
+  loadMessages() {
+    this.http.get<any[]>(
+      `http://localhost:5119/api/messages/${this.myEmail}/${this.otherEmail}`
+    ).subscribe({
+      next: (res) => {
+        this.messages = res;
+        this.cd.detectChanges();
+      },
+      error: (err) => console.error("Load message error", err)
+    });
+  }
+
+  // 🔥 SEND TO DB
   sendMessage() {
     if (!this.newMessage.trim()) return;
 
-    this.messages.push({
-      text: this.newMessage,
-      sender: 'me'
-    });
+    const payload = {
+      senderEmail: this.myEmail,
+      receiverEmail: this.otherEmail,
+      text: this.newMessage
+    };
 
-    this.newMessage = '';
+    this.http.post(`http://localhost:5119/api/messages/send`, payload)
+      .subscribe({
+        next: () => {
+          this.newMessage = '';
+          this.loadMessages(); // reload after send
+        },
+        error: (err) => console.error("Send error", err)
+      });
+  }
+
+  closeChat() {
+    localStorage.removeItem('chatUser');
+    window.location.href = '/user-dashboard';
   }
 }

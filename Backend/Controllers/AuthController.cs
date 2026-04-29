@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ChatApplication.Models;
 using System.Text;
 using System.Text.Json;
@@ -6,10 +7,12 @@ using BCrypt.Net;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+
 namespace ChatApplication.Controllers
 {
     [ApiController]
     [Route("api/auth")]
+    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly HttpClient _http;
@@ -25,8 +28,9 @@ namespace ChatApplication.Controllers
         }
 
         // ===========================
-        // ✅ SIGNUP
+        // SIGNUP
         // ===========================
+        [AllowAnonymous]
         [HttpPost("signup")]
         public async Task<IActionResult> Signup([FromBody] User user)
         {
@@ -40,16 +44,12 @@ namespace ChatApplication.Controllers
                 user.Status = "pending";
                 user.Role = "User";
                 user.CreatedAt = DateTime.Now;
-
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
                 var json = JsonSerializer.Serialize(user);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                await _http.PutAsync(
-                    $"http://localhost:5984/userdb/{user.Email}",
-                    content
-                );
+                await _http.PutAsync($"http://localhost:5984/userdb/{user.Email}", content);
 
                 return Ok(new { message = "User registered successfully" });
             }
@@ -61,8 +61,9 @@ namespace ChatApplication.Controllers
         }
 
         // ===========================
-        // 🔥 LOGIN
+        // LOGIN
         // ===========================
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest req)
         {
@@ -70,7 +71,6 @@ namespace ChatApplication.Controllers
             {
                 var response = await _http.GetAsync($"http://localhost:5984/userdb/{req.Email}");
 
-                // 🔥 USER LOGIN
                 if (response.IsSuccessStatusCode)
                 {
                     var data = await response.Content.ReadAsStringAsync();
@@ -85,15 +85,13 @@ namespace ChatApplication.Controllers
                     if (user.Status != "approved")
                         return BadRequest(new { message = "User not approved yet" });
 
-                    // 🔥 GENERATE SESSION ID
+                    // 🔥 SESSION
                     var sessionId = Guid.NewGuid().ToString();
                     user.SessionId = sessionId;
 
-                    // 🔥 GET _rev
                     var doc = JsonDocument.Parse(data);
                     var rev = doc.RootElement.GetProperty("_rev").GetString();
 
-                    // 🔥 UPDATE USER IN COUCHDB
                     var updatedJson = JsonSerializer.Serialize(user);
                     var content = new StringContent(updatedJson, Encoding.UTF8, "application/json");
 
@@ -102,7 +100,7 @@ namespace ChatApplication.Controllers
                         content
                     );
 
-                    // 🔥 JWT GENERATION
+                    // 🔥 JWT
                     var key = "THIS_IS_MY_SUPER_SECRET_KEY_12345";
 
                     var claims = new[]
@@ -125,18 +123,17 @@ namespace ChatApplication.Controllers
                     return Ok(new
                     {
                         token = tokenString,
-                        sessionId = sessionId,   // 🔥 IMPORTANT
+                        sessionId,
                         role = user.Role,
                         name = user.FirstName + " " + user.LastName,
                         email = user.Email
                     });
                 }
 
-                // 🔥 ADMIN LOGIN
+                // ADMIN LOGIN
                 if (req.Email == "admin@gmail.com" && req.Password == "123")
                 {
                     var sessionId = Guid.NewGuid().ToString();
-
                     var key = "THIS_IS_MY_SUPER_SECRET_KEY_12345";
 
                     var claims = new[]
@@ -159,7 +156,7 @@ namespace ChatApplication.Controllers
                     return Ok(new
                     {
                         token = tokenString,
-                        sessionId = sessionId,
+                        sessionId,
                         role = "Admin",
                         name = "Admin User",
                         email = "admin@gmail.com"
@@ -174,15 +171,15 @@ namespace ChatApplication.Controllers
                 return StatusCode(500, new { message = "Server error" });
             }
         }
+
         // ===========================
-        // 🔥 FIXED GET USER (IMPORTANT)
+        // GET USER
         // ===========================
         [HttpGet("user/{email}")]
-        public async Task<IActionResult> GetUser([FromRoute] string email)
+        public async Task<IActionResult> GetUser(string email)
         {
             try
             {
-                // 🔹 Decode URL (handles @ properly)
                 email = Uri.UnescapeDataString(email);
 
                 var response = await _http.GetAsync($"http://localhost:5984/userdb/{email}");
@@ -195,6 +192,11 @@ namespace ChatApplication.Controllers
 
                 if (user == null)
                     return NotFound(new { message = "User not found" });
+
+                var sessionHeader = Request.Headers["X-Session-Id"].ToString();
+
+                if (user.SessionId != sessionHeader)
+                    return Unauthorized(new { message = "Session expired" });
 
                 return Ok(new
                 {
@@ -213,13 +215,30 @@ namespace ChatApplication.Controllers
         }
 
         // ===========================
-        // GET USERS
+        // 🔥 GET USERS (FIXED)
         // ===========================
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
             try
             {
+                var email = User.Identity?.Name;
+
+                if (string.IsNullOrEmpty(email))
+                    return Unauthorized(new { message = "Invalid token" });
+
+                var userRes = await _http.GetAsync($"http://localhost:5984/userdb/{email}");
+                var userData = await userRes.Content.ReadAsStringAsync();
+                var currentUser = JsonSerializer.Deserialize<User>(userData);
+
+                if (currentUser == null)
+                    return Unauthorized(new { message = "User not found" });
+
+                var sessionHeader = Request.Headers["X-Session-Id"].ToString();
+
+                if (currentUser.SessionId != sessionHeader)
+                    return Unauthorized(new { message = "Session expired" });
+
                 var response = await _http.GetAsync(
                     "http://localhost:5984/userdb/_all_docs?include_docs=true"
                 );
@@ -235,18 +254,16 @@ namespace ChatApplication.Controllers
                     {
                         if (userDoc.TryGetProperty("Email", out _))
                         {
-                            var user = JsonSerializer.Deserialize<User>(userDoc.ToString());
+                            var u = JsonSerializer.Deserialize<User>(userDoc.ToString());
 
-                            if (user != null)
+                            if (u != null)
                             {
                                 usersList.Add(new
                                 {
-                                    user.FirstName,
-                                    user.LastName,
-                                    user.Email,
-                                    user.Role,
-                                    user.Status,
-                                    user.CreatedAt
+                                    name = u.FirstName + " " + u.LastName,
+                                    email = u.Email,
+                                    role = u.Role,
+                                    status = u.Status
                                 });
                             }
                         }
@@ -258,82 +275,6 @@ namespace ChatApplication.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine("Fetch error: " + ex.Message);
-                return StatusCode(500, new { message = "Server error" });
-            }
-        }
-
-        // ===========================
-        // APPROVE
-        // ===========================
-        [HttpPost("approve")]
-        public async Task<IActionResult> Approve([FromBody] EmailRequest req)
-        {
-            try
-            {
-                var getRes = await _http.GetAsync($"http://localhost:5984/userdb/{req.Email}");
-
-                if (!getRes.IsSuccessStatusCode)
-                    return NotFound(new { message = "User not found" });
-
-                var getData = await getRes.Content.ReadAsStringAsync();
-                var doc = JsonDocument.Parse(getData);
-                var rev = doc.RootElement.GetProperty("_rev").GetString();
-
-                var user = JsonSerializer.Deserialize<User>(getData);
-
-                user.Status = "approved";
-
-                var json = JsonSerializer.Serialize(user);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                await _http.PutAsync(
-                    $"http://localhost:5984/userdb/{req.Email}?rev={rev}",
-                    content
-                );
-
-                return Ok(new { message = "User approved" });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Approve error: " + ex.Message);
-                return StatusCode(500, new { message = "Server error" });
-            }
-        }
-
-        // ===========================
-        // REJECT
-        // ===========================
-        [HttpPost("reject")]
-        public async Task<IActionResult> Reject([FromBody] EmailRequest req)
-        {
-            try
-            {
-                var getRes = await _http.GetAsync($"http://localhost:5984/userdb/{req.Email}");
-
-                if (!getRes.IsSuccessStatusCode)
-                    return NotFound(new { message = "User not found" });
-
-                var getData = await getRes.Content.ReadAsStringAsync();
-                var doc = JsonDocument.Parse(getData);
-                var rev = doc.RootElement.GetProperty("_rev").GetString();
-
-                var user = JsonSerializer.Deserialize<User>(getData);
-
-                user.Status = "rejected";
-
-                var json = JsonSerializer.Serialize(user);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                await _http.PutAsync(
-                    $"http://localhost:5984/userdb/{req.Email}?rev={rev}",
-                    content
-                );
-
-                return Ok(new { message = "User rejected" });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Reject error: " + ex.Message);
                 return StatusCode(500, new { message = "Server error" });
             }
         }

@@ -9,7 +9,9 @@ namespace ChatApplication.Models
         public string Role { get; set; } = "User";
         public string Status { get; set; } = "pending";
 
-        // ⏱️ NEW FIELD
         public DateTime CreatedAt { get; set; }
+
+        // 🔥 NEW FIELD
+        public string SessionId { get; set; } = "";
     }
 }
