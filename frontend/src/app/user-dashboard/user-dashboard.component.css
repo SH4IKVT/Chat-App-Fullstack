@@ -1,94 +1,62 @@
-/* Container */
-.ud-container {
-  min-height: 100vh;
-  background: #f8fafc;
-  padding: 40px;
-  font-family: 'Inter', -apple-system, sans-serif;
+.users-section {
+  margin-top: 30px;
+}
+
+.user-list {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* Card */
-.ud-card {
-  width: 100%;
-  max-width: 500px;
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 25px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-}
-
-/* Header */
-.ud-header h2 {
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 5px;
-  color: #0f172a;
-}
-
-.subtitle {
-  font-size: 14px;
-  color: #64748b;
-}
-
-/* Body */
-.ud-body {
-  margin-top: 20px;
-}
-
-/* Rows */
-.ud-row {
+.user-item {
   display: flex;
   justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #e2e8f0;
+  align-items: center;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-.ud-row span {
-  color: #64748b;
-  font-size: 14px;
+.user-info .name {
+  font-weight: 600;
 }
 
-.ud-row strong {
-  color: #0f172a;
-  font-weight: 500;
-}
-
-/* Status */
-.status {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-/* Status Colors */
-.approved {
-  background: #ecfdf5;
-  color: #059669;
-}
-
-.pending {
-  background: #fef9c3;
-  color: #854d0e;
-}
-
-.rejected {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-/* Loading */
-.ud-loading {
-  font-size: 16px;
+.user-info .email {
+  font-size: 13px;
   color: #64748b;
 }
 
-/* Error */
-.ud-error {
-  color: #b91c1c;
-  background: #fee2e2;
-  padding: 10px;
+.msg-btn {
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 6px 12px;
   border-radius: 6px;
+  cursor: pointer;
+}
+
+.msg-btn:hover {
+  background: #16a34a;
+}
+.ud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Logout Button */
+.logout-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
 }

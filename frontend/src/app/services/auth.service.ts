@@ -1,6 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
+// 🔥 OPTIONAL BUT CLEAN
+export interface User {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  status: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   constructor(private http: HttpClient) {}
@@ -15,8 +24,9 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/login`, data);
   }
 
+  // 🔥 FIXED TYPE
   getUsers() {
-    return this.http.get(`${this.baseUrl}/users`);
+    return this.http.get<User[]>(`${this.baseUrl}/users`);
   }
 
   approve(email: string) {
@@ -27,9 +37,9 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/reject`, { email });
   }
 
-  // 🔥 FIXED METHOD
+  // 🔥 KEEP THIS
   getUserByEmail(email: string) {
     const encodedEmail = encodeURIComponent(email);
-    return this.http.get(`${this.baseUrl}/user/${encodedEmail}`);
+    return this.http.get<any>(`${this.baseUrl}/user/${encodedEmail}`);
   }
 }
