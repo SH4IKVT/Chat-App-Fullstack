@@ -1,48 +1,67 @@
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [FormsModule, CommonModule],
-  templateUrl: './signup.component.html'
+  imports: [CommonModule, FormsModule],
+  templateUrl: './signup.component.html',
+  styleUrls: ['./signup.component.css']
 })
 export class SignupComponent {
 
-  user = {
+  signupData = {
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
-    role: 'User'
+    password: ''
   };
 
   errorMsg: string = '';
-  successMsg: string = '';
+  showError: boolean = false;
 
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private cd: ChangeDetectorRef
+  ) {}
 
-  register() {
-    this.auth.signup(this.user).subscribe({
+  signup() {
+    this.auth.signup(this.signupData).subscribe({
       next: (res: any) => {
-        console.log("Signup success", res);
+        console.log("Signup success:", res);
 
-        this.errorMsg = '';
-        this.successMsg = res.message;
+        this.errorMsg = "Signup successful! Wait for admin approval.";
+        this.showError = true;
 
-        // optional alert
-        alert(res.message);
+        this.cd.detectChanges();
+
+        setTimeout(() => {
+          this.showError = false;
+          this.router.navigate(['/']);
+        }, 2500);
       },
+
       error: (err) => {
-        console.log("Signup error", err);
+        console.error("Signup error:", err);
 
-        this.successMsg = '';
-        this.errorMsg = err.error?.message || "Something went wrong";
+        if (err.status === 400) {
+          this.errorMsg = err.error?.message || "User already exists";
+        } else {
+          this.errorMsg = "Something went wrong";
+        }
 
-        // optional alert
-        alert(this.errorMsg);
+        this.showError = true;
+        this.cd.detectChanges();
+
+        setTimeout(() => {
+          this.showError = false;
+          this.cd.detectChanges();
+        }, 3000);
       }
     });
   }

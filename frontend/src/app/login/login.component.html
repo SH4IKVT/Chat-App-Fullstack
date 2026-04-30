@@ -1,8 +1,11 @@
+<div *ngIf="showError" class="error-popup">
+  {{ errorMsg }}
+</div>
+<div class="success-popup" *ngIf="showSuccess">Login successful!</div>
 <div class="login-container">
 
   <div class="login-card">
-    <h2>Welcome Back</h2>
-    <p class="subtitle">Sign in to your account</p>
+    <h2>Log in account</h2>
 
     <input [(ngModel)]="loginData.email" placeholder="Email">
     <input [(ngModel)]="loginData.password" type="password" placeholder="Password">
@@ -13,8 +16,9 @@
     </select>
 
     <button (click)="login()">Login</button>
-
-    <p class="error" *ngIf="errorMsg">{{errorMsg}}</p>
+    <p class="switch">
+      Don't have an account?
+      <span (click)="router.navigate(['/signup'])">Sign up</span>
+    </p>
   </div>
-
 </div>

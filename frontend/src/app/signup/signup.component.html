@@ -1,14 +1,48 @@
-<h2>Signup</h2>
+<div class="auth-container">
 
-<input [(ngModel)]="user.firstName" placeholder="First Name">
-<input [(ngModel)]="user.lastName" placeholder="Last Name">
-<input [(ngModel)]="user.email" placeholder="Email">
-<input [(ngModel)]="user.password" type="password" placeholder="Password">
+  <!-- POPUP -->
+  <div *ngIf="showError" class="popup">
+    {{ errorMsg }}
+  </div>
 
-<button (click)="register()">Register</button>
+  <div class="auth-card">
 
-<!-- ✅ SUCCESS MESSAGE -->
-<p style="color: green;" *ngIf="successMsg">{{successMsg}}</p>
+    <h2>Create Account</h2>
 
-<!-- ❌ ERROR MESSAGE -->
-<p style="color: red;" *ngIf="errorMsg">{{errorMsg}}</p>
+    <form (ngSubmit)="signup()">
+
+      <input type="text"
+             placeholder="First Name"
+             [(ngModel)]="signupData.firstName"
+             name="firstName"
+             required />
+
+      <input type="text"
+             placeholder="Last Name"
+             [(ngModel)]="signupData.lastName"
+             name="lastName"
+             required />
+
+      <input type="email"
+             placeholder="Email"
+             [(ngModel)]="signupData.email"
+             name="email"
+             required />
+
+      <input type="password"
+             placeholder="Password"
+             [(ngModel)]="signupData.password"
+             name="password"
+             required />
+
+      <button type="submit">Register</button>
+
+    </form>
+
+    <p class="switch">
+      Already have an account?
+      <span (click)="router.navigate(['/'])">Login</span>
+    </p>
+
+  </div>
+</div>

@@ -20,7 +20,7 @@
 
 /* Title */
 .login-card h2 {
-  margin-bottom: 5px;
+  margin-bottom: 20px;
   color: #0f172a;
 }
 
@@ -49,6 +49,11 @@
   border-color: #3b82f6;
   box-shadow: 0 0 5px rgba(59,130,246,0.3);
 }
+.switch span {
+  color: #2a5298;
+  cursor: pointer;
+  font-weight: bold;
+}
 
 /* Button */
 .login-card button {
@@ -74,3 +79,50 @@
   font-size: 13px;
   margin-top: 10px;
 }
+.error-popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #ff4d4f;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 999;
+  animation: slideIn 2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.success-popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #22c55e;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 999;
+  animation: slideInSuccess 2s ease;
+}
+@keyframes slideInSuccess {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+} 
