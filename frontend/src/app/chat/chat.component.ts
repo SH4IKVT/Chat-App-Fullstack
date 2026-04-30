@@ -1,8 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-chat',
@@ -13,6 +13,8 @@ import { HttpClient } from '@angular/common/http';
 })
 export class ChatComponent implements OnInit {
 
+  private API = 'http://localhost:5119';
+
   chatUser: string = '';
   messages: any[] = [];
   newMessage: string = '';
@@ -21,45 +23,40 @@ export class ChatComponent implements OnInit {
   otherEmail: string = '';
 
   constructor(
-    private auth: AuthService,
     private cd: ChangeDetectorRef,
-    private http: HttpClient
+    private http: HttpClient,
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.myEmail = localStorage.getItem('email') || '';
     this.otherEmail = localStorage.getItem('chatUser') || '';
 
+    // 🔥 NO API CALL → NO 401
+    this.chatUser = localStorage.getItem('chatUserName') || this.otherEmail;
+
     if (!this.otherEmail) {
       this.chatUser = 'Unknown';
       return;
     }
 
-    // 🔥 get name
-    this.auth.getUserByEmail(this.otherEmail).subscribe({
-      next: (res: any) => {
-        this.chatUser = res?.name || this.otherEmail;
-        this.cd.detectChanges();
-      }
-    });
-
     this.loadMessages();
   }
 
-  // 🔥 LOAD FROM DB
   loadMessages() {
     this.http.get<any[]>(
-      `http://localhost:5119/api/messages/${this.myEmail}/${this.otherEmail}`
+      `${this.API}/api/messages/${this.myEmail}/${this.otherEmail}`
     ).subscribe({
       next: (res) => {
         this.messages = res;
         this.cd.detectChanges();
       },
-      error: (err) => console.error("Load message error", err)
+      error: (err) => {
+        console.error("Load message error", err);
+      }
     });
   }
 
-  // 🔥 SEND TO DB
   sendMessage() {
     if (!this.newMessage.trim()) return;
 
@@ -69,18 +66,28 @@ export class ChatComponent implements OnInit {
       text: this.newMessage
     };
 
-    this.http.post(`http://localhost:5119/api/messages/send`, payload)
+    this.http.post(`${this.API}/api/messages/send`, payload)
       .subscribe({
         next: () => {
           this.newMessage = '';
-          this.loadMessages(); // reload after send
+          this.loadMessages();
         },
-        error: (err) => console.error("Send error", err)
+        error: (err) => {
+          console.error("Send error", err);
+        }
       });
   }
 
   closeChat() {
     localStorage.removeItem('chatUser');
-    window.location.href = '/user-dashboard';
+    localStorage.removeItem('chatUserName');
+
+    const role = localStorage.getItem('role');
+
+    if (role === 'Admin') {
+      this.router.navigate(['/admin-dashboard']);
+    } else {
+      this.router.navigate(['/user-dashboard']);
+    }
   }
 }

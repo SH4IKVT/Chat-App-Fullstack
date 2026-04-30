@@ -1,17 +1,12 @@
 <div class="ud-container">
 
-  <!-- 🔥 HEADER WITH LOGOUT -->
   <div class="ud-header">
     <h2>User Dashboard</h2>
-
-    <button class="logout-btn" (click)="logout()">
-      Logout
-    </button>
+    <button class="logout-btn" (click)="logout()">Logout</button>
   </div>
 
   <!-- USER INFO -->
   <div *ngIf="!loading && user" class="ud-card">
-
     <p><b>Name:</b> {{user?.name}}</p>
     <p><b>Email:</b> {{user?.email}}</p>
     <p><b>Role:</b> {{user?.role}}</p>
@@ -20,10 +15,9 @@
       <span>Status :</span>
       <span class="status">{{user?.status}}</span>
     </div>
-
   </div>
 
-  <!-- 🔥 OTHER USERS -->
+  <!-- OTHER USERS -->
   <div class="users-section">
 
     <h3>Other Users</h3>
@@ -37,11 +31,12 @@
       <div *ngFor="let u of users" class="user-item">
 
         <div class="user-info">
-          <p class="name">{{u.firstName}} {{u.lastName}}</p>
+          <!-- 🔥 FIXED -->
+          <p class="name">{{u.name}}</p>
           <p class="email">{{u.email}}</p>
         </div>
 
-        <button class="msg-btn" (click)="messageUser(u.email)">
+        <button class="msg-btn" (click)="messageUser(u)">
           Message
         </button>
 

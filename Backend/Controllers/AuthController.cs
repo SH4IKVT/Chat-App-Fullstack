@@ -28,7 +28,7 @@ namespace ChatApplication.Controllers
         }
 
         // ===========================
-        // SIGNUP
+        // 🔥 SIGNUP (NEW)
         // ===========================
         [AllowAnonymous]
         [HttpPost("signup")]
@@ -36,22 +36,36 @@ namespace ChatApplication.Controllers
         {
             try
             {
-                var checkRes = await _http.GetAsync($"http://localhost:5984/userdb/{user.Email}");
+                // 🔥 Check if user already exists
+                var check = await _http.GetAsync($"http://localhost:5984/userdb/{user.Email}");
 
-                if (checkRes.IsSuccessStatusCode)
+                if (check.IsSuccessStatusCode)
+                {
                     return BadRequest(new { message = "User already exists" });
+                }
 
-                user.Status = "pending";
-                user.Role = "User";
-                user.CreatedAt = DateTime.Now;
+                // 🔥 Hash password
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+
+                // 🔥 Default values
+                user.Role = "User";
+                user.Status = "pending";
+                user.SessionId = "";
 
                 var json = JsonSerializer.Serialize(user);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                await _http.PutAsync($"http://localhost:5984/userdb/{user.Email}", content);
+                var response = await _http.PutAsync(
+                    $"http://localhost:5984/userdb/{user.Email}",
+                    content
+                );
 
-                return Ok(new { message = "User registered successfully" });
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok(new { message = "Signup successful. Wait for admin approval." });
+                }
+
+                return BadRequest(new { message = "Signup failed" });
             }
             catch (Exception ex)
             {
@@ -85,7 +99,6 @@ namespace ChatApplication.Controllers
                     if (user.Status != "approved")
                         return BadRequest(new { message = "User not approved yet" });
 
-                    // 🔥 SESSION
                     var sessionId = Guid.NewGuid().ToString();
                     user.SessionId = sessionId;
 
@@ -100,7 +113,6 @@ namespace ChatApplication.Controllers
                         content
                     );
 
-                    // 🔥 JWT
                     var key = "THIS_IS_MY_SUPER_SECRET_KEY_12345";
 
                     var claims = new[]
@@ -173,59 +185,29 @@ namespace ChatApplication.Controllers
         }
 
         // ===========================
-        // GET USER
-        // ===========================
-        [HttpGet("user/{email}")]
-        public async Task<IActionResult> GetUser(string email)
-        {
-            try
-            {
-                email = Uri.UnescapeDataString(email);
-
-                var response = await _http.GetAsync($"http://localhost:5984/userdb/{email}");
-
-                if (!response.IsSuccessStatusCode)
-                    return NotFound(new { message = "User not found" });
-
-                var data = await response.Content.ReadAsStringAsync();
-                var user = JsonSerializer.Deserialize<User>(data);
-
-                if (user == null)
-                    return NotFound(new { message = "User not found" });
-
-                var sessionHeader = Request.Headers["X-Session-Id"].ToString();
-
-                if (user.SessionId != sessionHeader)
-                    return Unauthorized(new { message = "Session expired" });
-
-                return Ok(new
-                {
-                    name = user.FirstName + " " + user.LastName,
-                    email = user.Email,
-                    role = user.Role,
-                    status = user.Status,
-                    createdAt = user.CreatedAt
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("GetUser error: " + ex.Message);
-                return StatusCode(500, new { message = "Server error" });
-            }
-        }
-
-        // ===========================
-        // 🔥 GET USERS (FIXED)
+        // USERS (UNCHANGED)
         // ===========================
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
             try
             {
-                var email = User.Identity?.Name;
+                var email = User.Claims.FirstOrDefault(c =>
+                    c.Type == ClaimTypes.Name ||
+                    c.Type.Contains("name")
+                )?.Value;
+
+                var role = User.Claims.FirstOrDefault(c =>
+                    c.Type == ClaimTypes.Role
+                )?.Value;
 
                 if (string.IsNullOrEmpty(email))
                     return Unauthorized(new { message = "Invalid token" });
+
+                if (role == "Admin")
+                {
+                    return await FetchAllUsers();
+                }
 
                 var userRes = await _http.GetAsync($"http://localhost:5984/userdb/{email}");
                 var userData = await userRes.Content.ReadAsStringAsync();
@@ -239,44 +221,49 @@ namespace ChatApplication.Controllers
                 if (currentUser.SessionId != sessionHeader)
                     return Unauthorized(new { message = "Session expired" });
 
-                var response = await _http.GetAsync(
-                    "http://localhost:5984/userdb/_all_docs?include_docs=true"
-                );
-
-                var data = await response.Content.ReadAsStringAsync();
-                var doc = JsonDocument.Parse(data);
-
-                var usersList = new List<object>();
-
-                foreach (var row in doc.RootElement.GetProperty("rows").EnumerateArray())
-                {
-                    if (row.TryGetProperty("doc", out var userDoc))
-                    {
-                        if (userDoc.TryGetProperty("Email", out _))
-                        {
-                            var u = JsonSerializer.Deserialize<User>(userDoc.ToString());
-
-                            if (u != null)
-                            {
-                                usersList.Add(new
-                                {
-                                    name = u.FirstName + " " + u.LastName,
-                                    email = u.Email,
-                                    role = u.Role,
-                                    status = u.Status
-                                });
-                            }
-                        }
-                    }
-                }
-
-                return Ok(usersList);
+                return await FetchAllUsers();
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Fetch error: " + ex.Message);
                 return StatusCode(500, new { message = "Server error" });
             }
+        }
+
+        private async Task<IActionResult> FetchAllUsers()
+        {
+            var response = await _http.GetAsync(
+                "http://localhost:5984/userdb/_all_docs?include_docs=true"
+            );
+
+            var data = await response.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(data);
+
+            var usersList = new List<object>();
+
+            foreach (var row in doc.RootElement.GetProperty("rows").EnumerateArray())
+            {
+                if (row.TryGetProperty("doc", out var userDoc))
+                {
+                    if (userDoc.TryGetProperty("Email", out _))
+                    {
+                        var u = JsonSerializer.Deserialize<User>(userDoc.ToString());
+
+                        if (u != null)
+                        {
+                            usersList.Add(new
+                            {
+                                name = u.FirstName + " " + u.LastName,
+                                email = u.Email,
+                                role = u.Role,
+                                status = u.Status
+                            });
+                        }
+                    }
+                }
+            }
+
+            return Ok(usersList);
         }
     }
 }

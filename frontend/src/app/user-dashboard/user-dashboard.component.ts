@@ -1,7 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, User } from '../services/auth.service';
-import { Router } from '@angular/router';  // 👈 ADD
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
@@ -12,11 +13,15 @@ import { Router } from '@angular/router';  // 👈 ADD
 export class UserDashboardComponent implements OnInit {
 
   user: any = null;
-  users: User[] = [];   // 🔥 typed properly
+  users: User[] = [];
   loading = true;
   errorMsg = '';
 
-  constructor(private auth: AuthService, private cd: ChangeDetectorRef,private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private cd: ChangeDetectorRef,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     const email = localStorage.getItem('email');
@@ -46,19 +51,17 @@ export class UserDashboardComponent implements OnInit {
       }
     });
   }
+
   logout() {
-    localStorage.clear();   // 🔥 remove user session
-    this.router.navigate(['/']);  // 🔥 go to login page
+    localStorage.clear();
+    this.router.navigate(['/']);
   }
-  // 🔥 FIXED METHOD
+
   loadAllUsers(currentEmail: string) {
     this.auth.getUsers().subscribe({
       next: (res) => {
-        console.log("ALL USERS:", res);
-
-        // 🔥 now TypeScript knows res is User[]
+        // backend returns { name, email, ... }
         this.users = res.filter(u => u.email !== currentEmail);
-
         this.cd.detectChanges();
       },
       error: (err) => {
@@ -67,11 +70,10 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
-  messageUser(email: string) {
-   console.log("Message user:", email);
-
-    // store selected user (for chat page later)
-    localStorage.setItem('chatUser', email);
+  // 🔥 FIXED: use `name` directly (not firstName/lastName)
+  messageUser(user: User) {
+    localStorage.setItem('chatUser', user.email);
+    localStorage.setItem('chatUserName', user.name || user.email);
 
     this.router.navigate(['/chat']);
   }
