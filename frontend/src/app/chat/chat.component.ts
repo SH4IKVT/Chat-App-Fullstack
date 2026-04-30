@@ -85,7 +85,7 @@ export class ChatComponent implements OnInit {
     const role = localStorage.getItem('role');
 
     if (role === 'Admin') {
-      this.router.navigate(['/admin-dashboard']);
+      this.router.navigate(['/dashboard']);
     } else {
       this.router.navigate(['/user-dashboard']);
     }

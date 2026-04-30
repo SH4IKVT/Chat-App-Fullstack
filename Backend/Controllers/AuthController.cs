@@ -28,7 +28,7 @@ namespace ChatApplication.Controllers
         }
 
         // ===========================
-        // 🔥 SIGNUP (NEW)
+        // SIGNUP
         // ===========================
         [AllowAnonymous]
         [HttpPost("signup")]
@@ -36,18 +36,12 @@ namespace ChatApplication.Controllers
         {
             try
             {
-                // 🔥 Check if user already exists
                 var check = await _http.GetAsync($"http://localhost:5984/userdb/{user.Email}");
 
                 if (check.IsSuccessStatusCode)
-                {
                     return BadRequest(new { message = "User already exists" });
-                }
 
-                // 🔥 Hash password
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
-
-                // 🔥 Default values
                 user.Role = "User";
                 user.Status = "pending";
                 user.SessionId = "";
@@ -61,9 +55,7 @@ namespace ChatApplication.Controllers
                 );
 
                 if (response.IsSuccessStatusCode)
-                {
                     return Ok(new { message = "Signup successful. Wait for admin approval." });
-                }
 
                 return BadRequest(new { message = "Signup failed" });
             }
@@ -90,10 +82,7 @@ namespace ChatApplication.Controllers
                     var data = await response.Content.ReadAsStringAsync();
                     var user = JsonSerializer.Deserialize<User>(data);
 
-                    if (user == null)
-                        return Unauthorized(new { message = "Invalid credentials" });
-
-                    if (!BCrypt.Net.BCrypt.Verify(req.Password, user.Password))
+                    if (user == null || !BCrypt.Net.BCrypt.Verify(req.Password, user.Password))
                         return Unauthorized(new { message = "Invalid credentials" });
 
                     if (user.Status != "approved")
@@ -185,41 +174,132 @@ namespace ChatApplication.Controllers
         }
 
         // ===========================
-        // USERS (UNCHANGED)
+        // 🔥 GET USER BY EMAIL (FIXED)
+        // ===========================
+        [HttpGet("user/{email}")]
+        public async Task<IActionResult> GetUserByEmail(string email)
+        {
+            try
+            {
+                var decodedEmail = Uri.UnescapeDataString(email);
+
+                var response = await _http.GetAsync($"http://localhost:5984/userdb/{decodedEmail}");
+
+                if (!response.IsSuccessStatusCode)
+                    return NotFound(new { message = "User not found" });
+
+                var data = await response.Content.ReadAsStringAsync();
+                var user = JsonSerializer.Deserialize<User>(data);
+
+                if (user == null)
+                    return NotFound(new { message = "User not found" });
+
+                return Ok(new
+                {
+                    firstName = user.FirstName,
+                    lastName = user.LastName,
+                    email = user.Email,
+                    role = user.Role,
+                    status = user.Status
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetUser error: " + ex.Message);
+                return StatusCode(500, new { message = "Server error" });
+            }
+        }
+        // ===========================t
+        // APPROVE USER
+        // ===========================
+        [HttpPost("approve")]
+        public async Task<IActionResult> Approve([FromBody] EmailRequest req)
+        {
+            try
+            {
+                var email = req.Email;
+
+                var response = await _http.GetAsync($"http://localhost:5984/userdb/{email}");
+
+                if (!response.IsSuccessStatusCode)
+                    return NotFound(new { message = "User not found" });
+
+                var json = await response.Content.ReadAsStringAsync();
+                var user = JsonSerializer.Deserialize<User>(json);
+
+                var doc = JsonDocument.Parse(json);
+                var rev = doc.RootElement.GetProperty("_rev").GetString();
+
+                user.Status = "approved";
+
+                var updatedJson = JsonSerializer.Serialize(user);
+                var content = new StringContent(updatedJson, Encoding.UTF8, "application/json");
+
+                await _http.PutAsync(
+                    $"http://localhost:5984/userdb/{email}?rev={rev}",
+                    content
+                );
+
+                return Ok(new { message = "User approved" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Approve error: " + ex.Message);
+                return StatusCode(500, new { message = "Server error" });
+            }
+        }
+        // ===========================
+        // REJECT USER
+        // ===========================
+        [HttpPost("reject")]
+        public async Task<IActionResult> Reject([FromBody] EmailRequest req)
+        {
+            try
+            {
+                var email = req.Email;
+
+                var response = await _http.GetAsync($"http://localhost:5984/userdb/{email}");
+
+                if (!response.IsSuccessStatusCode)
+                    return NotFound(new { message = "User not found" });
+
+                var json = await response.Content.ReadAsStringAsync();
+                var user = JsonSerializer.Deserialize<User>(json);
+
+                var doc = JsonDocument.Parse(json);
+                var rev = doc.RootElement.GetProperty("_rev").GetString();
+
+                user.Status = "rejected";
+
+                var updatedJson = JsonSerializer.Serialize(user);
+                var content = new StringContent(updatedJson, Encoding.UTF8, "application/json");
+
+                await _http.PutAsync(
+                    $"http://localhost:5984/userdb/{email}?rev={rev}",
+                    content
+                );
+
+                return Ok(new { message = "User rejected" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Reject error: " + ex.Message);
+                return StatusCode(500, new { message = "Server error" });
+            }
+        }
+
+        // ===========================
+        // USERS
         // ===========================
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
             try
             {
-                var email = User.Claims.FirstOrDefault(c =>
-                    c.Type == ClaimTypes.Name ||
-                    c.Type.Contains("name")
-                )?.Value;
-
-                var role = User.Claims.FirstOrDefault(c =>
-                    c.Type == ClaimTypes.Role
-                )?.Value;
-
-                if (string.IsNullOrEmpty(email))
-                    return Unauthorized(new { message = "Invalid token" });
+                var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
                 if (role == "Admin")
-                {
                     return await FetchAllUsers();
-                }
-
-                var userRes = await _http.GetAsync($"http://localhost:5984/userdb/{email}");
-                var userData = await userRes.Content.ReadAsStringAsync();
-                var currentUser = JsonSerializer.Deserialize<User>(userData);
-
-                if (currentUser == null)
-                    return Unauthorized(new { message = "User not found" });
-
-                var sessionHeader = Request.Headers["X-Session-Id"].ToString();
-
-                if (currentUser.SessionId != sessionHeader)
-                    return Unauthorized(new { message = "Session expired" });
 
                 return await FetchAllUsers();
             }

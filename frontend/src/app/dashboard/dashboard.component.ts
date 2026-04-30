@@ -15,6 +15,7 @@ export class DashboardComponent implements OnInit {
 
   role: string = '';
   users: any[] = [];
+  userEmail = '';
   loading = false;
 
   constructor(
@@ -23,6 +24,7 @@ export class DashboardComponent implements OnInit {
     private cd: ChangeDetectorRef
   ) {
     this.role = localStorage.getItem('role') || 'User';
+    this.userEmail = localStorage.getItem('email') || 'UserEmail'; 
   }
 
   ngOnInit() {

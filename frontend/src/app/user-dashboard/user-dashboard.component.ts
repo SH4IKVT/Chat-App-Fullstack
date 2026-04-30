@@ -40,11 +40,21 @@ export class UserDashboardComponent implements OnInit {
   loadUser(email: string) {
     this.auth.getUserByEmail(email).subscribe({
       next: (res: any) => {
-        this.user = res;
+        console.log("USER RAW:", res);
+
+        // 🔥 NORMALIZE DATA
+        this.user = {
+          name: (res.firstName || '') + ' ' + (res.lastName || ''),
+          email: res.email || res.Email,
+          role: res.role || res.Role,
+          status: res.status || res.Status
+        };
+
         this.loading = false;
         this.cd.detectChanges();
       },
-      error: () => {
+      error: (err) => {
+        console.error("User load error:", err);
         this.errorMsg = "Failed to load user";
         this.loading = false;
         this.cd.detectChanges();
@@ -59,7 +69,7 @@ export class UserDashboardComponent implements OnInit {
 
   loadAllUsers(currentEmail: string) {
     this.auth.getUsers().subscribe({
-      next: (res) => {
+      next: (res: User[]) => {
         // backend returns { name, email, ... }
         this.users = res.filter(u => u.email !== currentEmail);
         this.cd.detectChanges();
