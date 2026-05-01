@@ -1,44 +1,102 @@
-<div class="ud-container">
+<div class="dashboard">
 
-  <div class="ud-header">
-    <h2>User Dashboard</h2>
-    <button class="logout-btn" (click)="logout()">Logout</button>
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div>
+      <h2>User Dashboard</h2>
+      <p class="role">Role: User</p>
+      <p ><span class="welcome">Welcome, </span>{{user?.name}}!</p>
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      Logout
+    </button>
+  </div>
+  
+  <div class="piechats-section">
+
   </div>
 
   <!-- USER INFO -->
-  <div *ngIf="!loading && user" class="ud-card">
-    <p><b>Name:</b> {{user?.name}}</p>
-    <p><b>Email:</b> {{user?.email}}</p>
-    <p><b>Role:</b> {{user?.role}}</p>
+  <div class="user-section">
 
-    <div class="ud-row">
-      <span>Status :</span>
-      <span class="status">{{user?.status}}</span>
+    <h2 class="section-title">Your Profile</h2>
+
+    <div *ngIf="loading" class="info-box">
+      Loading your data...
     </div>
+
+    <div *ngIf="!loading && user" class="user-card">
+
+      <div class="user-header">
+        <h4>{{user.name.toUpperCase()}}</h4>
+
+        <span class="status approved">
+          {{user.status?.toUpperCase()}}
+        </span>
+      </div>
+
+      <div class="user-details">
+        <p><b>Email:</b> {{user.email}}</p>
+        <p><b>Role:</b> {{user.role}}</p>
+      </div>
+
+    </div>
+
   </div>
+  <div class="admin-user">
+    <h2 class="section-title">Admin User</h2>
 
+    <div *ngIf="loading" class="info-box">
+      Loading admin data...
+    </div>
+
+    <div *ngIf="!loading && admin" class="user-card">
+
+      <div class="user-header">
+        <h4>{{admin.name.toUpperCase()}}</h4>
+      </div>
+
+      <div class="user-details">
+        <p><b>Email:</b> {{admin.email}}</p>
+        <p><b>Role:</b> {{admin.role}}</p>
+      </div>
+
+    </div>
+        <div class="actions">
+          <button class="msg-btn" (click)="messageUser(admin)">
+            Message
+          </button>
+        </div>
+
+  </div>
   <!-- OTHER USERS -->
-  <div class="users-section">
+  <div class="other-users-section">
 
-    <h3>Other Users</h3>
+    <h2 class="section-title">Other Users</h2>
 
-    <div *ngIf="users.length === 0">
+    <div *ngIf="users.length === 0" class="info-box">
       No users available
     </div>
 
     <div class="user-list">
 
-      <div *ngFor="let u of users" class="user-item">
+      <div *ngFor="let u of users" class="user-card">
 
-        <div class="user-info">
-          <!-- 🔥 FIXED -->
-          <p class="name">{{u.name}}</p>
-          <p class="email">{{u.email}}</p>
+        <div class="user-header">
+          <h4>{{u.name.toUpperCase()}}</h4>
         </div>
 
-        <button class="msg-btn" (click)="messageUser(u)">
-          Message
-        </button>
+        <div class="user-details">
+          <p><b>Email:</b> {{u.email}}</p>
+          <p><b>Role:</b> {{u.role}}</p>
+        </div>
+
+        <div class="actions">
+          <button class="msg-btn" (click)="messageUser(u)">
+            Message
+          </button>
+        </div>
 
       </div>
 

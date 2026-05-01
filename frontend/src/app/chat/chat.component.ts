@@ -21,6 +21,7 @@ export class ChatComponent implements OnInit {
 
   myEmail: string = '';
   otherEmail: string = '';
+  chatUserName: string = '';
 
   constructor(
     private cd: ChangeDetectorRef,
@@ -28,20 +29,29 @@ export class ChatComponent implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit() {
-    this.myEmail = localStorage.getItem('email') || '';
-    this.otherEmail = localStorage.getItem('chatUser') || '';
+ngOnInit() {
+  this.myEmail = localStorage.getItem('email') || '';
+  this.otherEmail = localStorage.getItem('chatUser') || '';
 
-    // 🔥 NO API CALL → NO 401
-    this.chatUser = localStorage.getItem('chatUserName') || this.otherEmail;
-
-    if (!this.otherEmail) {
-      this.chatUser = 'Unknown';
-      return;
-    }
-
-    this.loadMessages();
+  if (!this.otherEmail) {
+    this.chatUser = 'Unknown';
+    return;
   }
+
+  // 🔥 FETCH NAME FROM BACKEND
+  this.http.get<any>(`${this.API}/api/auth/user/${encodeURIComponent(this.otherEmail)}`)
+    .subscribe({
+      next: (res) => {
+        this.chatUserName = (res.firstName || '') + ' ' + (res.lastName || '');
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.chatUser = this.otherEmail;
+      }
+    });
+
+  this.loadMessages();
+}
 
   loadMessages() {
     this.http.get<any[]>(
@@ -49,6 +59,7 @@ export class ChatComponent implements OnInit {
     ).subscribe({
       next: (res) => {
         this.messages = res;
+        console.log("Messages loaded:", res);
         this.cd.detectChanges();
       },
       error: (err) => {

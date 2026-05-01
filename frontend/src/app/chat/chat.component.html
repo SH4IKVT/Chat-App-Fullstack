@@ -1,37 +1,51 @@
-<div class="chat-container">
+<div class="dashboard">
 
-  <div class="chat-header">
-    <button class="close-btn" (click)="closeChat()"><</button>
-    <h3 class="usr-name">{{chatUser}}</h3>
-    <hr>
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <div>
+      <h2>Chat</h2>
+      <p class="role"><span class="chat-username">{{chatUserName.toUpperCase()}}</span></p>
+    </div>
+
+    <button class="logout-btn" (click)="closeChat()">
+      Back
+    </button>
   </div>
 
-<div class="chat-body">
+  <!-- CHAT BODY -->
+  <div class="admin-section">
 
-  <div *ngIf="messages.length === 0" class="empty">
-    No messages yet
+    <div class="chat-card">
+
+      <div *ngIf="messages.length === 0" class="empty">
+        No messages yet
+      </div>
+
+      <div *ngFor="let msg of messages"
+           [ngClass]="{
+             'message': true,
+             'sent': msg.senderEmail === myEmail,
+             'received': msg.senderEmail !== myEmail
+           }">
+
+        {{msg.text}}
+
+      </div>
+
+    </div>
+
   </div>
 
-  <div *ngFor="let msg of messages"
-       [ngClass]="{
-         'message': true,
-         'sent': msg.senderEmail === myEmail,
-         'received': msg.senderEmail !== myEmail
-       }">
-
-    {{msg.text}}
-
-  </div>
-
-</div>
-
-  <div class="chat-footer">
-    <input
-      type="text"
-      [(ngModel)]="newMessage"
-      placeholder="Type a message..."
-    />
-    <button (click)="sendMessage()">Send</button>
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="chat-input">
+      <input
+        type="text"
+        [(ngModel)]="newMessage"
+        placeholder="Type a message..."
+      />
+      <button (click)="sendMessage()">Send</button>
+    </div>
   </div>
 
 </div>

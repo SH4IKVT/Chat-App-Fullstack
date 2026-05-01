@@ -5,7 +5,8 @@
     <div>
       <h2>Admin Dashboard</h2>
       <p class="role">Role: {{role}}</p>
-      <p class="welcome">Welcome, {{userEmail}}!</p>
+      <p ><span class="welcome">Welcome, </span>Admin</p>
+      <p class="admin-gmail"> admin@gmail.com</p>
     </div>
 
     <button class="logout-btn" (click)="logout()">
@@ -17,18 +18,24 @@
   <div *ngIf="role === 'Admin'; else userView" class="admin-section">
 
     <h2 class="section-title">Admin Panel</h2>
-    <p>The User requests are listed below for your review and approval.</p>
-
+    
     <!-- Loading -->
     <div *ngIf="loading" class="info-box">
       Loading users...
     </div>
-
+    
     <!-- No Users -->
     <div *ngIf="!loading && users.length === 0" class="info-box">
       No users found.
     </div>
-
+    <div class="broadcast-section">
+      <button class="chat-btn" (click)="messageAll()">
+        Message All Users
+      </button>
+      <p>Here all the messages will be sent to all users</p>
+    </div>
+    
+    <p>The User requests are listed below for your review and approval.</p>
     <!-- USERS -->
     <div *ngIf="!loading && users.length > 0" class="user-list">
 
@@ -43,13 +50,15 @@
               'pending': user.status === 'pending',
               'rejected': user.status === 'rejected'
             }">
-            {{user.status}}
+            {{user.status.toUpperCase()}}
           </span>
         </div>
-
-        <div class="user-details">
-          <p><b>Email:</b> {{user.email}}</p>
-          <p><b>Role:</b> {{user.role}}</p>
+        <div class="user-info">
+          <p class="name">{{user.name.toUpperCase()}}</p>
+          <div class="user-details">
+            <p><b>Email:</b> {{user.email}}</p>
+            <p><b>Role:</b> {{user.role}}</p>
+          </div>
         </div>
 
         <!-- 🔥 ACTIONS -->
@@ -94,10 +103,6 @@
   </ng-template>
 
   <!-- 🔥 FOOTER -->
-  <div class="footer">
-    <button class="chat-btn" (click)="messageAll()">
-      Message All Users
-    </button>
-  </div>
+
 
 </div>

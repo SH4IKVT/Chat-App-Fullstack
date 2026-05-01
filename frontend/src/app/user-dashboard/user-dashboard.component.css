@@ -1,72 +1,121 @@
-.ud-container {
+.dashboard {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #1e3c72, #134397);
   min-height: 100vh;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  padding: 30px;
+  padding: 20px;
 }
 
-.ud-header {
+/* HEADER */
+.dashboard-header {
+  font-family: lato, sans-serif;
+  font-size: 1.6em;
+  margin: 0% 10%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   color: white;
 }
+.role {
+  color: #3b82f6;
+}
 
-.logout-btn {
-  background: #ff4d4f;
-  color: white;
-  border: none;
-  padding: 8px 14px;
+/* SECTION */
+.user-section {
+  margin: 1% 10%;
+}
+.other-users-section {
+  margin: 1% 10%;
+} 
+.admin-user{
+  margin: 1% 10%;
+} 
+.welcome{
+  font-size: 2em;
+}
+/* INFO BOX */
+.info-box {
+  background: #e2e8f0;
+  padding: 10px;
   border-radius: 6px;
-  cursor: pointer;
+  margin: 2%;
 }
-
-.ud-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-top: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+.section-title {
+  color: white ;
+  margin-bottom: 20px;
 }
-
-.ud-row {
-  margin-top: 10px;
-}
-
-.status {
-  font-weight: bold;
-  color: #2a5298;
-}
-
-.users-section {
-  margin-top: 30px;
-}
-
+/* GRID */
 .user-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 15px;
 }
 
-.user-item {
-  background: white;
-  padding: 15px;
+/* CARD */
+.user-card {
+  color: white;
+  background: rgb(6, 25, 169);
+  padding: 18px;
   border-radius: 10px;
-  width: 250px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: 0.2s;
+}
+
+.user-card:hover {
+  transform: translateY(-4px);
+}
+
+/* HEADER INSIDE CARD */
+.user-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 1.6em;
 }
 
-.user-info .name {
-  font-weight: bold;
+/* STATUS */
+.status {
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* DETAILS */
+.user-details {
+  margin: 10px 0;
+}
+
+/* BUTTONS */
+.actions {
+  display: flex;
 }
 
 .msg-btn {
-  background: #2a5298;
+  background: #3b82f6;
   color: white;
   border: none;
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
+  width: 100%;
+}
+
+.msg-btn:hover {
+  background: #2563eb;
+}
+
+/* LOGOUT */
+.logout-btn {
+  background: #ff4d4f;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+}
+.logout-btn:hover {
+  background: #d9363e;
 }

@@ -70,7 +70,7 @@ export class DashboardComponent implements OnInit {
 
   // 🔥 NEW: MESSAGE SINGLE USER
   messageUser(email: string) {
-    console.log("Message user:", email);
+    console.log("Messaging user:", email);
 
     // store selected user (for chat page later)
     localStorage.setItem('chatUser', email);

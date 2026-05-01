@@ -16,6 +16,11 @@ export class UserDashboardComponent implements OnInit {
   users: User[] = [];
   loading = true;
   errorMsg = '';
+  admin= {
+    name: 'Admin',
+    email: 'admin@gmail.com',
+    role: 'Admin'
+  }
 
   constructor(
     private auth: AuthService,
@@ -43,11 +48,12 @@ export class UserDashboardComponent implements OnInit {
         console.log("USER RAW:", res);
 
         // 🔥 NORMALIZE DATA
+        // i want to show the names as upper case how to do that in html
         this.user = {
           name: (res.firstName || '') + ' ' + (res.lastName || ''),
           email: res.email || res.Email,
           role: res.role || res.Role,
-          status: res.status || res.Status
+          status: res.status?.toUpperCase() || res.Status?.toUpperCase()
         };
 
         this.loading = false;
@@ -84,7 +90,7 @@ export class UserDashboardComponent implements OnInit {
   messageUser(user: User) {
     localStorage.setItem('chatUser', user.email);
     localStorage.setItem('chatUserName', user.name || user.email);
-
+    console.log("Message user:", user);
     this.router.navigate(['/chat']);
   }
 }

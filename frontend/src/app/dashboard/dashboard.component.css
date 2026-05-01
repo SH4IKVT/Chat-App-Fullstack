@@ -2,17 +2,22 @@
 /* Global font */
 .dashboard {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: #f8fafc;
+  background: linear-gradient(135deg, #1e3c72, #134397)
 }
 
 /* Header */
 .dashboard-header {
-  margin: 2% 10%;
+  font-family: lato, sans-serif;
+  font-size: 1.6em;
+  margin: 0% 10%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: white;
 }
-
+.welcome{
+  font-size: 2em;
+}
 .role {
   color: #3b82f6;
   font-weight: 500;
@@ -20,6 +25,18 @@
 .admin-section {
   margin: 1% 10%;
 } 
+.admin-section h2{
+  font-size: 1.4em;
+  color: white;
+}
+.admin-section p{
+  color: white;
+
+}
+.admin-gmail{
+  color: #3b82f6;
+  font-weight: 500;
+}
 
 /* Section */
 .section-title {
@@ -125,13 +142,12 @@ button:disabled {
 }
 
 .logout-btn {
-  background: #ef4444;
+  background: #ff4d4f;
   color: white;
   border: none;
-  padding: 6px 14px;
+  padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
 }
 .reject-btn:hover {
   background: #dc2626;
@@ -159,15 +175,28 @@ button:disabled {
   background: #2563eb;
 }
 .msg-btn {
-  background: #3b82f6;
+  background: #2a5298;
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 6px 10px;
   border-radius: 6px;
+  width: 100%;
   cursor: pointer;
-  margin-left: 6px;
 }
-
 .msg-btn:hover {
-  background: #2563eb;
+  background: #1e3c72;
+} 
+.admin-section .section-title {
+  font-family: monteserrat;
+  font-size: 1.4em;
+}
+.broadcast-section {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.broadcast-section p{
+  margin: 2%;
+
 }
