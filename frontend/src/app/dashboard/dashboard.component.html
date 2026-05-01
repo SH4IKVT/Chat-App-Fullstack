@@ -42,7 +42,8 @@
       <div *ngFor="let user of users" class="user-card">
 
         <div class="user-header">
-          <h4>{{user.firstName}} {{user.lastName}}</h4>
+          <!-- <h4>{{user.firstName}} {{user.lastName}}</h4> -->
+          <p class="name">{{user.name.toUpperCase()}}</p>
 
           <span class="status"
             [ngClass]="{
@@ -54,7 +55,6 @@
           </span>
         </div>
         <div class="user-info">
-          <p class="name">{{user.name.toUpperCase()}}</p>
           <div class="user-details">
             <p><b>Email:</b> {{user.email}}</p>
             <p><b>Role:</b> {{user.role}}</p>

@@ -35,7 +35,6 @@ public class MessageController : ControllerBase
     [HttpGet("{u1}/{u2}")]
     public IActionResult GetMessages(string u1, string u2)
     {
-        // 🔥 decode emails (fix %40 issue)
         u1 = Uri.UnescapeDataString(u1);
         u2 = Uri.UnescapeDataString(u2);
 
@@ -48,6 +47,8 @@ public class MessageController : ControllerBase
                 (sender_email = @u1 AND receiver_email = @u2)
                 OR
                 (sender_email = @u2 AND receiver_email = @u1)
+                OR
+                (receiver_email = 'ALL')   -- 🔥 THIS LINE FIXES YOUR LIFE
             ORDER BY created_at ASC";
 
         using var cmd = new NpgsqlCommand(query, con);

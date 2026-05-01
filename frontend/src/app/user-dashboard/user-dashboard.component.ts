@@ -16,11 +16,19 @@ export class UserDashboardComponent implements OnInit {
   users: User[] = [];
   loading = true;
   errorMsg = '';
-  admin= {
-    name: 'Admin',
+
+  broadcastMessages: any[] = [];
+  unreadAdminMessage: any = null;
+
+  // ✅ FIXED ADMIN OBJECT (NOW HAS name)
+  admin: User = {
+    name: 'ADMIN USER',
+    firstName: 'ADMIN',
+    lastName: 'USER',
     email: 'admin@gmail.com',
-    role: 'Admin'
-  }
+    role: 'Admin',
+    status: 'approved'
+  };
 
   constructor(
     private auth: AuthService,
@@ -45,16 +53,15 @@ export class UserDashboardComponent implements OnInit {
   loadUser(email: string) {
     this.auth.getUserByEmail(email).subscribe({
       next: (res: any) => {
-        console.log("USER RAW:", res);
 
-        // 🔥 NORMALIZE DATA
-        // i want to show the names as upper case how to do that in html
         this.user = {
           name: (res.firstName || '') + ' ' + (res.lastName || ''),
           email: res.email || res.Email,
           role: res.role || res.Role,
           status: res.status?.toUpperCase() || res.Status?.toUpperCase()
         };
+
+        this.loadMessages();
 
         this.loading = false;
         this.cd.detectChanges();
@@ -68,16 +75,54 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
+  // 🔥 LOAD MESSAGES
+  loadMessages() {
+    const email = this.user.email;
+
+    this.auth.getMessages(email, 'admin@gmail.com').subscribe({
+      next: (res: any[]) => {
+
+        // ✅ NOTICE BOARD
+        this.broadcastMessages = res.filter(m => m.receiverEmail === 'ALL');
+        // how to get top 4 messages for notice board?
+        if (this.broadcastMessages.length > 4) {
+          this.broadcastMessages = this.broadcastMessages.slice(-4);
+        }
+        // ✅ PERSONAL MESSAGE
+        const personal = res.find(m =>
+          m.senderEmail === 'admin@gmail.com' &&
+          m.receiverEmail === email
+        );
+
+        if (personal) {
+          this.unreadAdminMessage = personal;
+        }
+
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error("Message load error", err);
+      }
+    });
+  }
+
   logout() {
     localStorage.clear();
     this.router.navigate(['/']);
   }
 
+  // 🔥 FIXED USER LIST (NORMALIZATION)
   loadAllUsers(currentEmail: string) {
     this.auth.getUsers().subscribe({
       next: (res: User[]) => {
-        // backend returns { name, email, ... }
-        this.users = res.filter(u => u.email !== currentEmail);
+
+        this.users = res
+          .filter(u => u.email !== currentEmail)
+          .map(u => ({
+            ...u,
+            name: u.name || (u.firstName + ' ' + u.lastName)
+          }));
+
         this.cd.detectChanges();
       },
       error: (err) => {
@@ -86,11 +131,9 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
-  // 🔥 FIXED: use `name` directly (not firstName/lastName)
   messageUser(user: User) {
     localStorage.setItem('chatUser', user.email);
     localStorage.setItem('chatUserName', user.name || user.email);
-    console.log("Message user:", user);
     this.router.navigate(['/chat']);
   }
 }

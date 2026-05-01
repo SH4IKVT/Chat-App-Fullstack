@@ -12,6 +12,19 @@
       Logout
     </button>
   </div>
+  <div class="notice-board">
+
+    <h2 class="section-title">Notice Board</h2>
+
+    <div *ngIf="broadcastMessages.length === 0" class="info-box">
+      No announcements yet
+    </div>
+
+    <div *ngFor="let msg of broadcastMessages" class="announcement-msg">
+      <p>{{msg.text.toUpperCase()}}</p>
+    </div>
+
+  </div>
   
   <div class="piechats-section">
 
@@ -47,28 +60,29 @@
   <div class="admin-user">
     <h2 class="section-title">Admin User</h2>
 
-    <div *ngIf="loading" class="info-box">
-      Loading admin data...
-    </div>
-
-    <div *ngIf="!loading && admin" class="user-card">
+    <div class="user-card">
 
       <div class="user-header">
-        <h4>{{admin.name.toUpperCase()}}</h4>
+        <h4>ADMIN</h4>
       </div>
 
       <div class="user-details">
-        <p><b>Email:</b> {{admin.email}}</p>
-        <p><b>Role:</b> {{admin.role}}</p>
+        <p><b>Email:</b> admin@gmail.com</p>
+      </div>
+
+      <!-- 🔥 UNREAD MESSAGE -->
+      <div *ngIf="unreadAdminMessage" class="unread-box">
+        You have a new message from Admin
+        <button (click)="messageUser(admin)">Tap to read</button>
+      </div>
+
+      <div class="actions">
+        <button class="msg-btn" (click)="messageUser(admin)">
+          Message
+        </button>
       </div>
 
     </div>
-        <div class="actions">
-          <button class="msg-btn" (click)="messageUser(admin)">
-            Message
-          </button>
-        </div>
-
   </div>
   <!-- OTHER USERS -->
   <div class="other-users-section">
@@ -85,6 +99,7 @@
 
         <div class="user-header">
           <h4>{{u.name.toUpperCase()}}</h4>
+          <i class="fa-solid fa-circle-user"></i>
         </div>
 
         <div class="user-details">

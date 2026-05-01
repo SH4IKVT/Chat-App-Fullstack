@@ -12,6 +12,14 @@ export interface User {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  getMessages(user1: string, user2: string) {
+    return this.http.get<any[]>(
+      `http://localhost:5119/api/messages/${user1}/${user2}`
+    );
+  }
+  // getMessages(email: any, arg1: string) {
+  //   throw new Error('Method not implemented.');
+  // }
 
   private baseUrl = 'http://localhost:5119/api/auth';
 
@@ -47,6 +55,7 @@ getUserByEmail(email: string) {
   getToken() {
     return localStorage.getItem('token');
   }
+
 
   logout() {
     localStorage.clear();
