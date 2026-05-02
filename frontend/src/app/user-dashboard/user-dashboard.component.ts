@@ -81,13 +81,22 @@ export class UserDashboardComponent implements OnInit {
 
     this.auth.getMessages(email, 'admin@gmail.com').subscribe({
       next: (res: any[]) => {
-
-        // ✅ NOTICE BOARD
+        // const Allbroadcasts = res.filter(m => m.receiverEmail === 'ALL');
+        // console.log("All Broadcast Messages:", Allbroadcasts);
+        // const extractedmsg = Allbroadcasts.slice(-4);
+        // console.log("Extracted Broadcast Messages for Notice Board:", extractedmsg);
+        // const messageTimestamps = extractedmsg.map(m => m.createdAt);
+        // console.log("Timestamps of Extracted Messages:", messageTimestamps);
+        // // ✅ NOTICE BOARD
+        // const reverse = extractedmsg.reverse();
+        // console.log("Reverse Sorted Broadcast Messages:", reverse);
         this.broadcastMessages = res.filter(m => m.receiverEmail === 'ALL');
         // how to get top 4 messages for notice board?
+        
         if (this.broadcastMessages.length > 4) {
-          this.broadcastMessages = this.broadcastMessages.slice(-4);
+          this.broadcastMessages = this.broadcastMessages.slice(-4); // Get the last 4 messages
         }
+        console.log("the good time format messages for notice board:", this.broadcastMessages);
         // ✅ PERSONAL MESSAGE
         const personal = res.find(m =>
           m.senderEmail === 'admin@gmail.com' &&

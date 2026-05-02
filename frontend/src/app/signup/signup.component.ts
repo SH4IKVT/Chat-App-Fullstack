@@ -26,7 +26,7 @@ export class SignupComponent {
 
   constructor(
     private auth: AuthService,
-    private router: Router,
+    public router: Router,
     private cd: ChangeDetectorRef
   ) {}
 

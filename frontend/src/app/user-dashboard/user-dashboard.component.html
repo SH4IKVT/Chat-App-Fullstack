@@ -22,11 +22,8 @@
 
     <div *ngFor="let msg of broadcastMessages" class="announcement-msg">
       <p>{{msg.text.toUpperCase()}}</p>
+      <p class="msg-time">{{msg.createdAt | date:'short'}}</p>
     </div>
-
-  </div>
-  
-  <div class="piechats-section">
 
   </div>
 

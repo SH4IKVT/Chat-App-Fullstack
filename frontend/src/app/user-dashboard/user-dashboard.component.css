@@ -170,3 +170,17 @@
 .announcement-msg:hover {
   transform: translateY(-4px);
 }
+.notice-message {
+  display: flex;
+  flex-direction: column;
+}
+
+.msg-text {
+  font-size: 14px;
+}
+
+.msg-time {
+  font-size: 12px;
+  color: #cbd5f5;
+  margin-top: 4px;
+}
