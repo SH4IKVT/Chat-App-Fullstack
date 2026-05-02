@@ -202,3 +202,62 @@ button:disabled {
   margin: 2%;
 
 }
+.notice-board {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.msg-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.msg-table th {
+  text-align: center;
+  padding: 10px;
+  background: #1e3b728f;
+  color: white;
+}
+
+.msg-table td {
+  vertical-align: top;
+  padding: 10px;
+}
+
+.msg-card {
+  padding: 12px;
+  border-radius: 10px;
+  max-width: 300px;
+}
+
+.left {
+  background: green;
+  color: white;
+}
+
+.right {
+  background: #3b82f6;
+  color: white;
+  margin-left: auto;
+}
+
+.time {
+  display: block;
+  font-size: 11px;
+  margin-top: 5px;
+}
+.notice-container {
+  max-height: 400px;        /* 🔥 FIXED HEIGHT */
+  overflow-y: auto;         /* 🔥 ENABLE SCROLL */
+  border-radius: 10px;
+}
+
+/* Optional: smoother scroll feel */
+.notice-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notice-container::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 5px;
+}

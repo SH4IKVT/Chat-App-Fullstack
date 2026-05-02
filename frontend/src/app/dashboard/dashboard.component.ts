@@ -18,18 +18,20 @@ export class DashboardComponent implements OnInit {
   userEmail = '';
   loading = false;
 
+  messages: any[] = [];   // 🔥 NEW
+
   constructor(
     private router: Router,
     private auth: AuthService,
     private cd: ChangeDetectorRef
   ) {
     this.role = localStorage.getItem('role') || 'User';
-    this.userEmail = localStorage.getItem('email') || 'UserEmail'; 
+    this.userEmail = localStorage.getItem('email') || '';
   }
 
   ngOnInit() {
-    console.log("Dashboard loaded");
     this.loadUsers();
+    this.loadMessages();   // 🔥 LOAD ALL MESSAGES
   }
 
   logout() {
@@ -42,8 +44,6 @@ export class DashboardComponent implements OnInit {
 
     this.auth.getUsers().subscribe({
       next: (res: any[]) => {
-        console.log("Users:", res);
-
         this.users = [...res];
         this.loading = false;
         this.cd.detectChanges();
@@ -56,7 +56,38 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  approve(email: string) {
+  // 🔥 LOAD ALL MESSAGES FOR ADMIN
+loadMessages() {
+  const currentUser = this.userEmail?.toLowerCase().trim();
+
+  this.auth.getMessages(this.userEmail, 'ALL' ).subscribe({
+    next: (res: any[]) => {
+
+      this.messages = res.map(m => ({
+        ...m,
+        senderEmail: m.senderEmail?.toLowerCase().trim(),
+        receiverEmail: m.receiverEmail?.toLowerCase().trim(),
+        formattedTime: new Date(m.createdAt).toLocaleString()
+      }));
+
+      console.log("ADMIN EMAIL:", currentUser);
+      console.log("MESSAGES:", this.messages);
+
+      this.cd.detectChanges();
+    },
+    error: (err) => {
+      console.error("Message load error:", err);
+    }
+  });
+}
+
+// next: (res: any[]) => {
+//   this.messages = res.map(m => ({
+//     ...m,
+//     formattedTime: new Date(m.createdAt).toLocaleString()
+//   }));
+//   this.cd.detectChanges();
+approve(email: string) {
     this.auth.approve(email).subscribe(() => {
       this.loadUsers();
     });
@@ -68,22 +99,13 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // 🔥 NEW: MESSAGE SINGLE USER
   messageUser(email: string) {
-    console.log("Messaging user:", email);
-
-    // store selected user (for chat page later)
     localStorage.setItem('chatUser', email);
-
     this.router.navigate(['/chat']);
   }
 
-  // 🔥 NEW: MESSAGE ALL USERS
   messageAll() {
-    console.log("Message ALL users");
-
     localStorage.setItem('chatUser', 'ALL');
-
     this.router.navigate(['/chat']);
   }
 }

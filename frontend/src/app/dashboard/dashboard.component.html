@@ -28,13 +28,62 @@
     <div *ngIf="!loading && users.length === 0" class="info-box">
       No users found.
     </div>
-    <div class="broadcast-section">
-      <button class="chat-btn" (click)="messageAll()">
-        Message All Users
-      </button>
-      <p>Here all the messages will be sent to all users</p>
-    </div>
     
+    <table class="msg-table">
+      ...
+    </table>
+    
+    
+    
+    
+    <div class="notice-board">
+      
+      <h2 class="section-title">Notice Board (All Messages)</h2>
+      
+      <div *ngIf="messages.length === 0" class="info-box">
+        No messages yet
+      </div>
+      
+      <div class="notice-container">   <!-- 🔥 SCROLL CONTAINER -->
+        <table class="msg-table">
+          
+          <thead>
+            <tr>
+              <th>Received</th>
+              <th>Sent</th>
+            </tr>
+          </thead>
+          
+          <tbody>
+            
+            <tr *ngFor="let msg of messages">
+              
+              <!-- LEFT = RECEIVED -->
+              <td>
+                <div *ngIf="msg.receiverEmail === userEmail" class="msg-card left">
+                  <p><b>From:</b> {{msg.senderEmail}}</p>
+                  <p>{{msg.text}}</p>
+                  <span class="time">{{msg.formattedTime}}</span>
+                </div>
+              </td>
+              
+              <!-- RIGHT = SENT -->
+              <td>
+                <div *ngIf="msg.senderEmail === userEmail" class="msg-card right">
+                  <p><b>To:</b> {{msg.receiverEmail}}</p>
+                  <p>{{msg.text}}</p>
+                  <span class="time">{{msg.formattedTime}}</span>
+                </div>
+              </td>
+              
+            </tr>
+            
+          </tbody>
+          
+        </table>
+        
+      </div>
+    </div>
     <p>The User requests are listed below for your review and approval.</p>
     <!-- USERS -->
     <div *ngIf="!loading && users.length > 0" class="user-list">
@@ -90,6 +139,16 @@
       </div>
 
     </div>
+    <div class="notice-msg">
+      <h2>Notice all Users</h2>
+      <div class="broadcast-section">
+        <button class="chat-btn" (click)="messageAll()">
+          Message All Users
+        </button>
+        <p>Here all the messages will be sent to all users</p>
+      </div>
+
+    </div>
 
   </div>
 
@@ -101,7 +160,6 @@
       <p>Waiting for admin approval...</p>
     </div>
   </ng-template>
-
   <!-- 🔥 FOOTER -->
 
 

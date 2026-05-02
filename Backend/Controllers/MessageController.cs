@@ -41,16 +41,19 @@ public class MessageController : ControllerBase
         using var con = new NpgsqlConnection(conn);
         con.Open();
 
+        //explain the below line: this query fetches all messages where either: 
+        //1. sender is u1 and receiver is u2
+        //2. sender is u2 and receiver is u1
+        //3. receiver is 'ALL' (this is the crucial part that allows broadcast messages to be fetched for both users) 
         var query = @"
-            SELECT * FROM messages
-            WHERE 
-                (sender_email = @u1 AND receiver_email = @u2)
-                OR
-                (sender_email = @u2 AND receiver_email = @u1)
-                OR
-                (receiver_email = 'ALL')   -- 🔥 THIS LINE FIXES YOUR LIFE
-            ORDER BY created_at ASC";
-
+        SELECT * FROM messages
+        WHERE 
+            sender_email = @u1
+            OR
+            receiver_email = @u1
+            OR
+            receiver_email = 'ALL'
+        ORDER BY created_at ASC";
         using var cmd = new NpgsqlCommand(query, con);
         cmd.Parameters.AddWithValue("u1", u1);
         cmd.Parameters.AddWithValue("u2", u2);
