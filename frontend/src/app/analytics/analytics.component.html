@@ -1,0 +1,26 @@
+<div class="dashboard">
+
+  <!-- HEADER (same as admin) -->
+  <div class="dashboard-header">
+    <div>
+      <h2>Admin </h2>
+      <p class="role">Role: {{role}}</p>
+      <p><span class="welcome">Welcome, </span>Admin</p>
+      <p class="admin-gmail">admin@gmail.com</p>
+    </div>
+      <button class="goback-btn" (click)="goToBack()">
+      Back to Dashboard
+    </button>
+  </div>
+  <h1>User Analytics</h1>
+  
+  <!-- BODY -->
+  <div class="Piechart-section">
+    <h2 class="section-title">Pie Chart</h2>
+    <div class="chart-container">
+      <canvas id="pieChart"></canvas>
+    </div>
+    
+  </div>
+  
+</div>

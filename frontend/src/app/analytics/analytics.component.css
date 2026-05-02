@@ -1,0 +1,100 @@
+/* 🔥 SAME MAIN CONTAINER STYLE */
+.dashboard {
+  background: linear-gradient(135deg, #1e3c72, #134397);
+  min-height: 100vh;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  padding: 2% 10%;
+}
+
+/* 🔥 HEADER (SAME AS DASHBOARD) */
+.dashboard-header {
+  font-size: 1.6em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  font-size: 1.8em;
+}
+
+.role {
+  font-size: 13px;
+  opacity: 0.8;
+  color: #3b82f6;
+}
+
+.welcome {
+  font-weight: bold;
+}
+
+.admin-gmail {
+  font-size: 13px;
+  opacity: 0.8;
+  color:#3b82f6;
+}
+
+/* 🔥 BODY SECTION */
+.analytics-body {
+  /* margin: 3% 10%; */
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+/* 🔥 SECTION TITLE */
+.Piechart-section{
+  /* text-align: center; */
+  /* margin: 2% 10%; */
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 1.3em;
+  gap: 2;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+/* 🔥 CHART CONTAINER */
+.chart-container {
+  color: white;
+  width: 70%;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+  /* background: linear-gradient(135deg, #1e3c72, #134397); */
+  border-radius: 12px;
+  /* box-shadow: 0 8px 20px rgba(0,0,0,0.3); */
+}
+
+/* 🔥 RESPONSIVE */
+@media (max-width: 768px) {
+  .chart-container {
+    width: 60%;
+  }
+
+  .analytics-body {
+    margin: 5%;
+  }
+}
+.goback-btn {
+  background: #336cd473;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+.goback-btn:hover {
+  background: #ff4d5073;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}

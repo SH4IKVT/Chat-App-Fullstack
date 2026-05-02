@@ -3,8 +3,9 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ChatComponent } from './chat/chat.component';
 import { SignupComponent } from './signup/signup.component';
 import { UserDashboardComponent } from './user-dashboard/user-dashboard.component';
-
+import { AnalyticsComponent } from './analytics/analytics.component';
 import { authGuard } from './guards/auth.guard'; // 🔥 ADD THIS
+import { Component } from '@angular/core';
 
 export const routes = [
   { path: '', component: LoginComponent },
@@ -15,5 +16,7 @@ export const routes = [
   { path: 'user-dashboard', component: UserDashboardComponent, canActivate: [authGuard] },
 
   // PUBLIC
-  { path: 'signup', component: SignupComponent }
+  { path: 'signup', component: SignupComponent },
+  // for the analytics section
+  {  path: 'analytics',  component: AnalyticsComponent}
 ];

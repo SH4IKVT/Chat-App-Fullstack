@@ -16,8 +16,14 @@
 
   <!-- ADMIN PANEL -->
   <div *ngIf="role === 'Admin'; else userView" class="admin-section">
-
-    <h2 class="section-title">Admin Panel</h2>
+    <div class="panel">
+      <h2 class="section-title">Admin Panel</h2>
+      <div class="analytical-section">
+        <h2 class="analytical-header">Analytical Section</h2>
+        <button class="anyl-btn" (click)="goAnalyticsSection()">See analytics</button>
+      </div>
+  
+    </div>
     
     <!-- Loading -->
     <div *ngIf="loading" class="info-box">

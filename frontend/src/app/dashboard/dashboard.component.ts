@@ -108,4 +108,7 @@ approve(email: string) {
     localStorage.setItem('chatUser', 'ALL');
     this.router.navigate(['/chat']);
   }
+  goAnalyticsSection(){
+    this.router.navigate(['/analytics'])
+  }
 }

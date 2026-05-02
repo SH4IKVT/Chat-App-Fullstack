@@ -132,7 +132,7 @@ namespace ChatApplication.Controllers
                 }
 
                 // ADMIN LOGIN
-                if (req.Email == "admin@gmail.com" && req.Password == "$2a$11$XXEiGd9S1tDuRD6lIQCyOO/rHykRnG64GEWFByC04mGAXXEpkZz0K")
+                if (req.Email == "admin@gmail.com" && req.Password == "123")
                 {
                     var sessionId = Guid.NewGuid().ToString();
                     var key = "THIS_IS_MY_SUPER_SECRET_KEY_12345";
