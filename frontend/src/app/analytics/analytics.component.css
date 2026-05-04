@@ -126,3 +126,23 @@
   border-bottom: 1px solid rgba(255,255,255,0.1);
   color: white;
 }
+.user-details {
+  /* margin: 40px 10%; */
+  margin-bottom: 20px;
+}
+
+.print-btn {
+  margin-bottom: 15px;
+  margin-top: 15px;
+  padding: 8px 15px;
+  background: #10b981;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+
+}
+
+.print-btn:hover {
+  background: #059669;
+}

@@ -4,6 +4,8 @@ import { AuthService } from '../services/auth.service';
 import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 
 Chart.register(...registerables);
@@ -181,6 +183,42 @@ export class AnalyticsComponent implements OnInit {
       error: (err) => {
         console.error("Message load error", err);
       }
+    });
+  }
+  printPDF() {
+    const element = document.getElementById('userTable');
+
+    if (!element) return;
+
+    html2canvas(element).then(canvas => {
+
+      const imgData = canvas.toDataURL('image/png');
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const imgWidth = 210;
+      const pageHeight = 295;
+
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      // 🔥 FIRST PAGE
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // 🔥 MULTIPLE PAGES SUPPORT
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save('Users.pdf');
+
     });
   }
   Back() {

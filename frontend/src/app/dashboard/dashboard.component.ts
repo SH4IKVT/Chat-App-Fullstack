@@ -38,7 +38,7 @@ export class DashboardComponent implements OnInit {
     setInterval(() => {
       this.loadUsers();
       this.loadMessages();
-    }, 10000);   // 🔥 every 5 sec
+    }, 20000);   // 🔥 every 5 sec
   }
 
   logout() {

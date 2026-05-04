@@ -21,7 +21,7 @@
       <canvas id="pieChart"></canvas>
     </div>
   </div>
-  <h3 class="section-title">Message Analytics</h3>
+  <h2 class="section-title">Message Analytics</h2>
   <div class="chart-container">
     <canvas id="messageChart"></canvas>
   </div>
@@ -60,6 +60,40 @@
 
     </div>
 
+  </div>
+<!-- 🔥 USER TABLE SECTION -->
+  <div class="user-details">
+
+    <h2 class="section-title">All Users</h2>
+
+    
+    <div class="table-container">
+      
+      <table class="msg-table" id="userTable">
+        
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>{{user.name}}</td>
+            <td>{{user.email}}</td>
+            <td>{{user.role}}</td>
+            <td>{{user.status}}</td>
+          </tr>
+        </tbody>
+        
+      </table>
+      
+    </div>
+    
+    <button class="print-btn" (click)="printPDF()">Print as PDF</button>
   </div>
   
 </div>
