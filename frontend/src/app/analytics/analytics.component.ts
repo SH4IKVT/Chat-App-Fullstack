@@ -30,8 +30,10 @@ export class AnalyticsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadUsers();
-    this.loadMessages();   // 🔥 ADD THIS
+    setTimeout(()=>{
+      this.loadUsers();
+      this.loadMessages();   // 🔥 ADD THIS
+    },100)
   }
 
   loadUsers() {
@@ -57,69 +59,68 @@ export class AnalyticsComponent implements OnInit {
 
   createChart() {
 
-    if (Chart.getChart('pieChart')) {
-      Chart.getChart('pieChart')?.destroy();
-    }
+    setTimeout(() => {
 
-    const dataValues = [
-      this.total,
-      this.approved,
-      this.active,
-      this.total - this.approved
-    ];
+      const existingChart = Chart.getChart('pieChart');
+      if (existingChart) {
+        existingChart.destroy();   // 🔥 prevents duplicate crash
+      }
 
-    new Chart('pieChart', {
-      type: 'pie',
-      data: {
-        labels: ['Total Requests', 'Approved Users', 'Active Users', 'Pending Users'],
-        datasets: [{
-          data: dataValues,
-          backgroundColor: ['#3b82f6', '#e2e60e', '#dddbd8', '#ee1053']
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
+      const dataValues = [
+        this.total,
+        this.approved,
+        this.active,
+        this.total - this.approved
+      ];
 
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: {
-              color: '#ffffff',
-              padding: 20,
-              font: { size: 14 },
+      new Chart('pieChart', {
+        type: 'pie',
+        data: {
+          labels: ['Total Requests', 'Approved Users', 'Active Users', 'Pending Users'],
+          datasets: [{
+            data: dataValues,
+            backgroundColor: ['#3b82f6', '#e2e60e', '#dddbd8', '#ee1053']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: '#ffffff',
+                padding: 15,
+                generateLabels: (chart) => {
+                  const labels = chart.data.labels || [];
+                  const dataset = chart.data.datasets[0];
+                  const colors = dataset.backgroundColor as string[];
 
-              // 🔥 SHOW NUMBER BESIDE TEXT (CORRECT WAY)
-              generateLabels: (chart) => {
-                const labels = chart.data.labels || [];
-                const dataset = chart.data.datasets[0];
-
-                const bgColors = dataset.backgroundColor as string[]; // 🔥 FIX
-
-                return labels.map((label: any, i: number) => ({
-                  text: `${label} (${dataset.data[i]})`,
-                  fillStyle: bgColors[i],   // ✅ now safe
-                  hidden: false,
-                  index: i
-                }));
+                  return labels.map((label: any, i: number) => ({
+                    text: `${label} (${dataset.data[i]})`,
+                    fillStyle: colors[i],
+                    color: "white",
+                    hidden: false,
+                    index: i
+                  }));
+                }
               }
             }
           }
         }
-      }
-    });
+      });
+
+    }, 150);   // 🔥 ensures DOM ready
   }
   loadMessages() {
     this.auth.getAllMessages().subscribe({
       next: (res: any[]) => {
-        console.log("API DATA:", res);   // 🔥 MUST SEE DATA HERE
-
         this.messages = res.map(m => ({
           ...m,
           formattedTime: new Date(m.createdAt).toLocaleString()
         }));
 
-        console.log("PROCESSED:", this.messages); // 🔥 CHECK THIS
+        this.cd.detectChanges();   // 🔥 FIX UI NOT UPDATING
       },
       error: (err) => {
         console.error("Message load error", err);
