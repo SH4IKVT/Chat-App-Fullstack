@@ -21,9 +21,8 @@ export class AnalyticsComponent implements OnInit {
   total = 0;
   approved = 0;
   active = 0;
-  router: any;
-
-  constructor(private auth: AuthService) {
+  messages: any[]=[]
+  constructor(private auth: AuthService,private router: Router) {
     this.role = localStorage.getItem('role') || '';
   }
 
@@ -53,24 +52,48 @@ export class AnalyticsComponent implements OnInit {
   }
 
   createChart() {
+
+    if (Chart.getChart('pieChart')) {
+      Chart.getChart('pieChart')?.destroy();
+    }
+
+    const dataValues = [
+      this.total,
+      this.approved,
+      this.active,
+      this.total - this.approved
+    ];
+
     new Chart('pieChart', {
       type: 'pie',
       data: {
-        labels: ['Total Requests', 'Approved Users', 'Active Users'],
+        labels: ['Total Requests', 'Approved Users', 'Active Users', 'Pending Users'],
         datasets: [{
-          data: [this.total, this.approved, this.active],
-          backgroundColor: ['#3b82f6', '#10b981', '#f59e0b']
+          data: dataValues,
+          backgroundColor: ['#3b82f6', '#e2e60e', '#dddbd8', '#ee1053']
         }]
       },
       options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
         plugins: {
           legend: {
             position: 'right',
             labels: {
-              color: '#ffffff',   // 🔥 WHITE TEXT
+              color: '#ffffff',
               padding: 20,
-              font: {
-                size: 14
+              font: { size: 14 },
+
+              // 🔥 SHOW NUMBER BESIDE TEXT (CORRECT WAY)
+              generateLabels: (chart) => {
+                const labels = chart.data.labels || [];
+                return labels.map((label: any, i: number) => ({
+                  text: `${label} (${dataValues[i]})`,
+                  fillStyle: chart.data.datasets[0].backgroundColor[i],
+                  hidden: false,
+                  index: i
+                }));
               }
             }
           }
@@ -78,13 +101,12 @@ export class AnalyticsComponent implements OnInit {
       }
     });
   }
-  goToBack() {
-    localStorage.removeItem('chatUser');
-    localStorage.removeItem('chatUserName');
-
+  Back() {
+    console.log("Clicked to back to dashboard")
     const role = localStorage.getItem('role');
 
     if (role === 'Admin') {
+      console.log("goin to dashboard")
       this.router.navigate(['/dashboard']);
     } else {
       this.router.navigate(['/user-dashboard']);
