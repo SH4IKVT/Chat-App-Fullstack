@@ -73,6 +73,7 @@ obj/Debug/net10.0/
 Program.cs
 Services/
  JwtService.cs
+ RsaService.cs
  UserStore.cs
 
 [metadataReferences]

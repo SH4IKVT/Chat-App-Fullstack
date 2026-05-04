@@ -285,3 +285,9 @@ button:disabled {
 .anyl-btn:hover {
   background: #4f7de0;
 }
+.chart-container{
+  margin: 0% 10%;
+}
+.chart-container h2{
+  color: white;
+}

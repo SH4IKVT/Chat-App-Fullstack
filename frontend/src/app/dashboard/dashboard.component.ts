@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-dashboard',
@@ -31,7 +33,12 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.loadUsers();
-    this.loadMessages();   // 🔥 LOAD ALL MESSAGES
+    this.loadMessages();
+
+    setInterval(() => {
+      this.loadUsers();
+      this.loadMessages();
+    }, 10000);   // 🔥 every 5 sec
   }
 
   logout() {
@@ -46,6 +53,11 @@ export class DashboardComponent implements OnInit {
       next: (res: any[]) => {
         this.users = [...res];
         this.loading = false;
+
+        setTimeout(() => {
+          this.createBarChart();   // 🔥 ADD THIS
+        }, 100);
+
         this.cd.detectChanges();
       },
       error: (err) => {
@@ -80,7 +92,39 @@ loadMessages() {
     }
   });
 }
+//for column charts 
+  createBarChart() {
 
+    const existing = Chart.getChart('barChart');
+    if (existing) existing.destroy();
+
+    const total = this.users.length;
+    const approved = this.users.filter(u => u.status === 'approved').length;
+    const pending = this.users.filter(u => u.status === 'pending').length;
+
+    new Chart('barChart', {
+      type: 'bar',
+      data: {
+        labels: ['Total Users', 'Approved', 'Pending'],
+        datasets: [{
+          label: 'User Statistics',
+          data: [total, approved, pending]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: { color: '#fff' }
+          }
+        },
+        scales: {
+          x: { ticks: { color: '#fff' } },
+          y: { ticks: { color: '#fff' } }
+        }
+      }
+    });
+}
 // next: (res: any[]) => {
 //   this.messages = res.map(m => ({
 //     ...m,

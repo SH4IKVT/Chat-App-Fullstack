@@ -19,12 +19,17 @@ public class MessageController : ControllerBase
         con.Open();
 
         var query = @"INSERT INTO messages (sender_email, receiver_email, message)
-                      VALUES (@s, @r, @m)";
+                    VALUES (@s, @r, @m)";
 
         using var cmd = new NpgsqlCommand(query, con);
         cmd.Parameters.AddWithValue("s", msg.SenderEmail);
         cmd.Parameters.AddWithValue("r", msg.ReceiverEmail);
-        cmd.Parameters.AddWithValue("m", msg.Text);
+
+        // 🔥 ADD THIS LINE
+        var encryptedMsg = RsaService.Encrypt(msg.Text);
+
+        // 🔥 REPLACE THIS LINE
+        cmd.Parameters.AddWithValue("m", encryptedMsg);
 
         cmd.ExecuteNonQuery();
 
@@ -51,7 +56,7 @@ public class MessageController : ControllerBase
                 id = reader.GetInt32(0),
                 senderEmail = reader.GetString(1),
                 receiverEmail = reader.GetString(2),
-                text = reader.GetString(3),
+                text = RsaService.Decrypt(reader.GetString(3)),
                 createdAt = reader.GetDateTime(4)
             });
         }
@@ -97,7 +102,7 @@ public class MessageController : ControllerBase
                 id = reader.GetInt32(0),
                 senderEmail = reader.GetString(1),
                 receiverEmail = reader.GetString(2),
-                text = reader.GetString(3),
+                text = RsaService.Decrypt(reader.GetString(3)),
                 createdAt = reader.GetDateTime(4)
             });
         }

@@ -5,8 +5,8 @@ CREATE TABLE messages (
     message TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO messages (sender_email, receiver_email, message)
-VALUES ('user1@gmail.com', 'user2@gmail.com', 'Hello from PostgreSQL');
+-- broadcast me
 SELECT *
 FROM messages
 WHERE receiver_email = 'ALL';
+select * from messages;

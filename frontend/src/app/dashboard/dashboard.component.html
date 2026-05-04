@@ -14,6 +14,11 @@
     </button>
   </div>
 
+  <div class="chart-container">
+    <h2>The Column Chart</h2>
+    <canvas id="barChart"></canvas>
+  </div>
+
   <!-- ADMIN PANEL -->
   <div *ngIf="role === 'Admin'; else userView" class="admin-section">
     <div class="panel">

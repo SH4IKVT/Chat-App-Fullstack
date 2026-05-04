@@ -56,7 +56,56 @@ export class AnalyticsComponent implements OnInit {
       }
     });
   }
+  createMessageChart() {
 
+    const existing = Chart.getChart('messageChart');
+    if (existing) existing.destroy();
+
+    const adminEmail = 'admin@gmail.com';
+
+    let toAdmin = 0;
+    let fromAdmin = 0;
+    let others = 0;
+
+    this.messages.forEach(m => {
+      if (m.receiverEmail === adminEmail) {
+        toAdmin++;
+      } else if (m.senderEmail === adminEmail) {
+        fromAdmin++;
+      } else {
+        others++;
+      }
+    });
+
+    new Chart('messageChart', {
+      type: 'bar',
+      data: {
+        labels: ['To Admin', 'From Admin', 'Others'],
+        datasets: [{
+          label: 'Message Stats',
+          data: [toAdmin, fromAdmin, others],
+          backgroundColor: ['#3b82f6', '#10b981', '#ef4444']
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: { color: '#ffffff' }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#ffffff' }
+          },
+          y: {
+            ticks: { color: '#ffffff' }
+          }
+        }
+      }
+    });
+  }
   createChart() {
 
     setTimeout(() => {
@@ -115,12 +164,19 @@ export class AnalyticsComponent implements OnInit {
   loadMessages() {
     this.auth.getAllMessages().subscribe({
       next: (res: any[]) => {
+
         this.messages = res.map(m => ({
           ...m,
           formattedTime: new Date(m.createdAt).toLocaleString()
         }));
 
-        this.cd.detectChanges();   // 🔥 FIX UI NOT UPDATING
+        this.cd.detectChanges();
+
+        // 🔥 ADD THIS
+        setTimeout(() => {
+          this.createMessageChart();
+        }, 100);
+
       },
       error: (err) => {
         console.error("Message load error", err);

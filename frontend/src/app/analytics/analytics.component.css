@@ -58,6 +58,7 @@
   gap: 2;
   font-weight: bold;
   line-height: 1.2;
+  margin-bottom: 20px;
 }
 
 /* 🔥 CHART CONTAINER */
@@ -98,8 +99,10 @@
 #pieChart{
   width: 100%;
 }
-.message-history {
-  margin: 0% 10%;
+.message-history section-title{
+  font-size: 1.6em;
+  /* margin: 1% 10%; */
+
 }
 
 .table-container {
