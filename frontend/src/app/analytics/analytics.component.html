@@ -20,8 +20,42 @@
     <div class="chart-container">
       <canvas id="pieChart"></canvas>
     </div>
-    
-    
+  </div>
+<!-- 🔥 MESSAGE HISTORY SECTION -->
+  <div class="message-history">
+
+    <h2 class="section-title">Message History</h2>
+    <p>Total Messages: {{messages.length}}</p>
+    <div *ngIf="messages.length === 0" class="info-box">
+      No messages found
+    </div>
+
+    <div class="table-container">
+
+      <table class="msg-table">
+
+        <thead>
+          <tr>
+            <th>Sender</th>
+            <th>Receiver</th>
+            <th>Message</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let msg of messages">
+            <td>{{msg.senderEmail}}</td>
+            <td>{{msg.receiverEmail}}</td>
+            <td>{{msg.text}}</td>
+            <td>{{msg.formattedTime}}</td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
   </div>
   
 </div>

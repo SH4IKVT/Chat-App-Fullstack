@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
+import { ChangeDetectorRef } from '@angular/core';
+
 
 Chart.register(...registerables);
 
@@ -21,13 +23,15 @@ export class AnalyticsComponent implements OnInit {
   total = 0;
   approved = 0;
   active = 0;
-  messages: any[]=[]
-  constructor(private auth: AuthService,private router: Router) {
+  messages: any[]=[];
+  constructor(private auth: AuthService, private router: Router, private cd: ChangeDetectorRef) {
+
     this.role = localStorage.getItem('role') || '';
   }
 
   ngOnInit() {
     this.loadUsers();
+    this.loadMessages();   // 🔥 ADD THIS
   }
 
   loadUsers() {
@@ -88,9 +92,13 @@ export class AnalyticsComponent implements OnInit {
               // 🔥 SHOW NUMBER BESIDE TEXT (CORRECT WAY)
               generateLabels: (chart) => {
                 const labels = chart.data.labels || [];
+                const dataset = chart.data.datasets[0];
+
+                const bgColors = dataset.backgroundColor as string[]; // 🔥 FIX
+
                 return labels.map((label: any, i: number) => ({
-                  text: `${label} (${dataValues[i]})`,
-                  fillStyle: chart.data.datasets[0].backgroundColor[i],
+                  text: `${label} (${dataset.data[i]})`,
+                  fillStyle: bgColors[i],   // ✅ now safe
                   hidden: false,
                   index: i
                 }));
@@ -98,6 +106,23 @@ export class AnalyticsComponent implements OnInit {
             }
           }
         }
+      }
+    });
+  }
+  loadMessages() {
+    this.auth.getAllMessages().subscribe({
+      next: (res: any[]) => {
+        console.log("API DATA:", res);   // 🔥 MUST SEE DATA HERE
+
+        this.messages = res.map(m => ({
+          ...m,
+          formattedTime: new Date(m.createdAt).toLocaleString()
+        }));
+
+        console.log("PROCESSED:", this.messages); // 🔥 CHECK THIS
+      },
+      error: (err) => {
+        console.error("Message load error", err);
       }
     });
   }

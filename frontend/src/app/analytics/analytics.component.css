@@ -95,6 +95,31 @@
   border: none;
   cursor: pointer;
 }
-.pieChart{
+#pieChart{
   width: 100%;
+}
+.message-history {
+  margin: 0% 10%;
+}
+
+.table-container {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.msg-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.msg-table th {
+  background: #1e3c72;
+  color: white;
+  padding: 10px;
+}
+
+.msg-table td {
+  padding: 5px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  color: white;
 }

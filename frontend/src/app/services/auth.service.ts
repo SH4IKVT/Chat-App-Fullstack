@@ -56,7 +56,9 @@ getUserByEmail(email: string) {
     return localStorage.getItem('token');
   }
 
-
+  getAllMessages() {
+    return this.http.get<any[]>('http://localhost:5119/api/messages/all');
+  }
   logout() {
     localStorage.clear();
   }

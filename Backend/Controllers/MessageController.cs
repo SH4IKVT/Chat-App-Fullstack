@@ -30,6 +30,34 @@ public class MessageController : ControllerBase
 
         return Ok(new { message = "Saved" });
     }
+    [AllowAnonymous]   // 🔥 ADD THIS
+    [HttpGet("all")]
+    public IActionResult GetAllMessages()
+    {
+        using var con = new NpgsqlConnection(conn);
+        con.Open();
+
+        var query = "SELECT * FROM messages ORDER BY created_at DESC";
+
+        using var cmd = new NpgsqlCommand(query, con);
+        using var reader = cmd.ExecuteReader();
+
+        var list = new List<object>();
+
+        while (reader.Read())
+        {
+            list.Add(new
+            {
+                id = reader.GetInt32(0),
+                senderEmail = reader.GetString(1),
+                receiverEmail = reader.GetString(2),
+                text = reader.GetString(3),
+                createdAt = reader.GetDateTime(4)
+            });
+        }
+        Console.WriteLine("", list.Count);
+        return Ok(list);
+    }
 
     // 🔥 GET MESSAGES (FIXED)
     [HttpGet("{u1}/{u2}")]
