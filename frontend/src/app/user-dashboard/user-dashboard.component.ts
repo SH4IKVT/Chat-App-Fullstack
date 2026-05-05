@@ -20,7 +20,6 @@ export class UserDashboardComponent implements OnInit {
   broadcastMessages: any[] = [];
   unreadAdminMessage: any = null;
 
-  // ✅ FIXED ADMIN OBJECT (NOW HAS name)
   admin: User = {
     name: 'ADMIN USER',
     firstName: 'ADMIN',
@@ -37,7 +36,8 @@ export class UserDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const email = localStorage.getItem('email');
+    // ✅ FIX: use sessionStorage
+    const email = sessionStorage.getItem('email');
 
     if (!email) {
       this.errorMsg = "Session expired. Please login again.";
@@ -58,7 +58,7 @@ export class UserDashboardComponent implements OnInit {
           name: (res.firstName || '') + ' ' + (res.lastName || ''),
           email: res.email || res.Email,
           role: res.role || res.Role,
-          status: res.status?.toUpperCase() || res.Status?.toUpperCase()
+          status: (res.status || res.Status || '').toUpperCase()
         };
 
         this.loadMessages();
@@ -81,31 +81,19 @@ export class UserDashboardComponent implements OnInit {
 
     this.auth.getMessages(email, 'admin@gmail.com').subscribe({
       next: (res: any[]) => {
-        // const Allbroadcasts = res.filter(m => m.receiverEmail === 'ALL');
-        // console.log("All Broadcast Messages:", Allbroadcasts);
-        // const extractedmsg = Allbroadcasts.slice(-4);
-        // console.log("Extracted Broadcast Messages for Notice Board:", extractedmsg);
-        // const messageTimestamps = extractedmsg.map(m => m.createdAt);
-        // console.log("Timestamps of Extracted Messages:", messageTimestamps);
-        // // ✅ NOTICE BOARD
-        // const reverse = extractedmsg.reverse();
-        // console.log("Reverse Sorted Broadcast Messages:", reverse);
-        this.broadcastMessages = res.filter(m => m.receiverEmail === 'ALL');
-        // how to get top 4 messages for notice board?
-        
-        if (this.broadcastMessages.length > 4) {
-          this.broadcastMessages = this.broadcastMessages.slice(-4); // Get the last 4 messages
-        }
-        console.log("the good time format messages for notice board:", this.broadcastMessages);
-        // ✅ PERSONAL MESSAGE
+
+        // ✅ broadcast messages
+        this.broadcastMessages = res
+          .filter(m => m.receiverEmail?.toLowerCase() === 'all')
+          .slice(-4);
+
+        // ✅ personal admin message
         const personal = res.find(m =>
-          m.senderEmail === 'admin@gmail.com' &&
-          m.receiverEmail === email
+          m.senderEmail?.toLowerCase() === 'admin@gmail.com' &&
+          m.receiverEmail?.toLowerCase() === email.toLowerCase()
         );
 
-        if (personal) {
-          this.unreadAdminMessage = personal;
-        }
+        this.unreadAdminMessage = personal || null;
 
         this.cd.detectChanges();
       },
@@ -116,17 +104,18 @@ export class UserDashboardComponent implements OnInit {
   }
 
   logout() {
-    localStorage.clear();
+    // ✅ FIX: keep consistent
+    sessionStorage.clear();
     this.router.navigate(['/']);
   }
 
-  // 🔥 FIXED USER LIST (NORMALIZATION)
+  // 🔥 FIXED USER LIST
   loadAllUsers(currentEmail: string) {
     this.auth.getUsers().subscribe({
       next: (res: User[]) => {
 
         this.users = res
-          .filter(u => u.email !== currentEmail)
+          .filter(u => u.email.toLowerCase() !== currentEmail.toLowerCase())
           .map(u => ({
             ...u,
             name: u.name || (u.firstName + ' ' + u.lastName)
@@ -141,8 +130,10 @@ export class UserDashboardComponent implements OnInit {
   }
 
   messageUser(user: User) {
-    localStorage.setItem('chatUser', user.email);
-    localStorage.setItem('chatUserName', user.name || user.email);
+    // ✅ FIX: use sessionStorage
+    sessionStorage.setItem('chatUser', user.email);
+    sessionStorage.setItem('chatUserName', user.name || user.email);
+
     this.router.navigate(['/chat']);
   }
 }

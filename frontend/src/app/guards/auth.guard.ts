@@ -2,19 +2,14 @@ import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 
 export const authGuard: CanActivateFn = (route, state) => {
-
   const router = inject(Router);
 
-  const token = localStorage.getItem('token');
+  // FIXED: Check sessionStorage
+  const token = sessionStorage.getItem('token');
 
-  // 🔥 IF NOT LOGGED IN
   if (!token) {
-    console.log("Access denied. No token.");
-
-    router.navigate(['/']); // redirect to login
+    router.navigate(['/']); 
     return false;
   }
-
-  // 🔥 ALLOWED
   return true;
 };

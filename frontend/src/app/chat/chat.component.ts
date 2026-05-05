@@ -15,7 +15,6 @@ export class ChatComponent implements OnInit {
 
   private API = 'http://localhost:5119';
 
-  chatUser: string = '';
   messages: any[] = [];
   newMessage: string = '';
 
@@ -30,32 +29,37 @@ export class ChatComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.myEmail = localStorage.getItem('email') || '';
-    this.otherEmail = localStorage.getItem('chatUser') || '';
+    // ✅ Use sessionStorage everywhere
+    this.myEmail = sessionStorage.getItem('email') || '';
+    this.otherEmail = sessionStorage.getItem('chatUser') || '';
 
     if (!this.otherEmail) {
-      this.chatUser = 'Unknown';
+      console.error("No chat user found");
       return;
     }
 
-    // Fetch the user details for full name
-    this.http.get<any>(`${this.API}/api/auth/user/${encodeURIComponent(this.otherEmail)}`)
-      .subscribe({
-        next: (res) => {
-          this.chatUserName = (res.firstName || '') + ' ' + (res.lastName || '');
-          this.cd.detectChanges();
-        },
-        error: () => {
-          this.chatUserName = this.otherEmail;
-          this.cd.detectChanges();
-        }
-      });
+    // ✅ FIX: Handle "ALL" properly
+    if (this.otherEmail === 'ALL') {
+      this.chatUserName = 'ALL USERS';
+    } else {
+      this.http.get<any>(`${this.API}/api/auth/user/${encodeURIComponent(this.otherEmail)}`)
+        .subscribe({
+          next: (res) => {
+            this.chatUserName = (res.firstName || '') + ' ' + (res.lastName || '');
+            this.cd.detectChanges();
+          },
+          error: () => {
+            this.chatUserName = this.otherEmail;
+            this.cd.detectChanges();
+          }
+        });
+    }
 
     this.loadMessages();
   }
 
   private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -81,27 +85,27 @@ export class ChatComponent implements OnInit {
 
     const payload = {
       senderEmail: this.myEmail,
-      receiverEmail: this.otherEmail,
+      receiverEmail: this.otherEmail === 'ALL' ? 'ALL' : this.otherEmail,
       text: this.newMessage
     };
 
-    this.http.post(`${this.API}/api/messages/send`, payload, { headers: this.getAuthHeaders() })
-      .subscribe({
-        next: () => {
-          this.newMessage = '';
-          this.loadMessages();
-        },
-        error: (err) => {
-          console.error("Send error", err);
-        }
-      });
+    this.http.post(`${this.API}/api/messages/send`, payload, {
+      headers: this.getAuthHeaders()
+    }).subscribe({
+      next: () => {
+        this.newMessage = '';
+        this.loadMessages();
+      },
+      error: (err) => {
+        console.error("Send error", err);
+      }
+    });
   }
 
   closeChat() {
-    localStorage.removeItem('chatUser');
-    localStorage.removeItem('chatUserName');
+    sessionStorage.removeItem('chatUser');
 
-    const role = localStorage.getItem('role');
+    const role = sessionStorage.getItem('role');
 
     if (role === 'Admin') {
       this.router.navigate(['/dashboard']);

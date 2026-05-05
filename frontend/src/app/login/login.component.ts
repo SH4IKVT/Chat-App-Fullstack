@@ -13,78 +13,49 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  showError: boolean = false;
-  showSuccess: boolean = false;
-  loginData = {
-    email: '',
-    password: '',
-    role: 'User'
-  };
-  successMsg: string = '';
-  errorMsg: string = '';
-  loading: boolean = false;
+  showError = false;
+  showSuccess = false;
+  loginData = { email: '', password: '', role: 'User' };
+  successMsg = '';
+  errorMsg = '';
+  loading = false;
 
-  constructor(private auth: AuthService, public router: Router,private cd: ChangeDetectorRef) {}
+  constructor(private auth: AuthService, public router: Router, private cd: ChangeDetectorRef) {}
 
   login() {
-
-    // 🔹 Reset error
     this.errorMsg = '';
-
-    // 🔹 Basic validation
     if (!this.loginData.email || !this.loginData.password) {
       this.errorMsg = "Please enter email and password";
       return;
     }
 
     this.loading = true;
-
     this.auth.login(this.loginData).subscribe({
       next: (res: any) => {
-        console.log("Login success:", res);
         this.showSuccess = true;
         this.successMsg = "Login successful!";
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('sessionId', res.sessionId);
-        localStorage.setItem('email', res.email);
-        localStorage.setItem('role', res.role);
-        this.showSuccess = true;
+        
+        // FIXED: Using sessionStorage instead of localStorage
+        sessionStorage.setItem('token', res.token);
+        sessionStorage.setItem('sessionId', res.sessionId);
+        sessionStorage.setItem('email', res.email);
+        sessionStorage.setItem('role', res.role);
 
-         // 🔥 FORCE UI UPDATE
         this.cd.detectChanges();
         setTimeout(() => {
-          this.showSuccess = false;     
-          this.showError = false;
-          this.cd.detectChanges();
-        }, 5000);
-        if (res.role === 'Admin') {
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.router.navigate(['/user-dashboard']);
-        }
+          if (res.role === 'Admin') {
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.router.navigate(['/user-dashboard']);
+          }
+        }, 1000);
       },
-
-    error: (err) => {
-      if (err.status === 401) {
-        this.errorMsg = "Invalid email or password";
-      } else if (err.status === 400) {
-        this.errorMsg = err.error?.message || "User not approved yet";
-      } else {
-        this.errorMsg = "Something went wrong";
-      }
-
-      this.showError = true;
-      this.showSuccess = false;
-      console.log("SHOW ERROR:", this.showError, this.errorMsg);
-      // 🔥 FORCE UI UPDATE
-      this.cd.detectChanges();
-
-      setTimeout(() => {
-        this.showError = false;
-        this.showSuccess = false;     
+      error: (err) => {
+        this.loading = false;
+        this.errorMsg = err.status === 400 ? (err.error?.message || "User not approved yet") : "Invalid credentials";
+        this.showError = true;
         this.cd.detectChanges();
-      }, 5000);
-    }
+      }
     });
   }
 }

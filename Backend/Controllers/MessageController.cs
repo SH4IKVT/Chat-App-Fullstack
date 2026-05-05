@@ -69,19 +69,35 @@ public class MessageController : ControllerBase
         using var con = new NpgsqlConnection(conn);
         con.Open();
 
-        var query = @"
-        SELECT * FROM messages
-        WHERE 
-            (sender_email = @u1 AND receiver_email = @u2)
-            OR
-            (sender_email = @u2 AND receiver_email = @u1)
-            OR
-            (receiver_email = 'ALL')
-        ORDER BY created_at ASC";
+        string query;
+
+        // ✅ CASE 1: Broadcast chat
+        if (u2.ToLower() == "all")
+        {
+            query = @"
+            SELECT * FROM messages
+            WHERE receiver_email = 'ALL'
+            ORDER BY created_at ASC";
+        }
+        else
+        {
+            // ✅ CASE 2: Normal 1-to-1 chat ONLY
+            query = @"
+            SELECT * FROM messages
+            WHERE 
+                (sender_email = @u1 AND receiver_email = @u2)
+                OR
+                (sender_email = @u2 AND receiver_email = @u1)
+            ORDER BY created_at ASC";
+        }
 
         using var cmd = new NpgsqlCommand(query, con);
-        cmd.Parameters.AddWithValue("u1", u1);
-        cmd.Parameters.AddWithValue("u2", u2);
+
+        if (u2.ToLower() != "all")
+        {
+            cmd.Parameters.AddWithValue("u1", u1);
+            cmd.Parameters.AddWithValue("u2", u2);
+        }
 
         using var reader = cmd.ExecuteReader();
 

@@ -4,19 +4,17 @@ import { ChatComponent } from './chat/chat.component';
 import { SignupComponent } from './signup/signup.component';
 import { UserDashboardComponent } from './user-dashboard/user-dashboard.component';
 import { AnalyticsComponent } from './analytics/analytics.component';
-import { authGuard } from './guards/auth.guard'; // 🔥 ADD THIS
-import { Component } from '@angular/core';
+import { authGuard } from './guards/auth.guard';
 
 export const routes = [
   { path: '', component: LoginComponent },
 
-  // 🔥 PROTECTED ROUTES
+  // Protected
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'chat', component: ChatComponent, canActivate: [authGuard] },
   { path: 'user-dashboard', component: UserDashboardComponent, canActivate: [authGuard] },
+  { path: 'analytics', component: AnalyticsComponent, canActivate: [authGuard] },
 
-  // PUBLIC
-  { path: 'signup', component: SignupComponent },
-  // for the analytics section
-  {  path: 'analytics',  component: AnalyticsComponent}
+  // Public
+  { path: 'signup', component: SignupComponent }
 ];
