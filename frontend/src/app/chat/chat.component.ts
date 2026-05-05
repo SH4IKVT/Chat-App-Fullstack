@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 @Component({
@@ -29,37 +29,45 @@ export class ChatComponent implements OnInit {
     private router: Router
   ) {}
 
-ngOnInit() {
-  this.myEmail = localStorage.getItem('email') || '';
-  this.otherEmail = localStorage.getItem('chatUser') || '';
+  ngOnInit() {
+    this.myEmail = localStorage.getItem('email') || '';
+    this.otherEmail = localStorage.getItem('chatUser') || '';
 
-  if (!this.otherEmail) {
-    this.chatUser = 'Unknown';
-    return;
+    if (!this.otherEmail) {
+      this.chatUser = 'Unknown';
+      return;
+    }
+
+    // Fetch the user details for full name
+    this.http.get<any>(`${this.API}/api/auth/user/${encodeURIComponent(this.otherEmail)}`)
+      .subscribe({
+        next: (res) => {
+          this.chatUserName = (res.firstName || '') + ' ' + (res.lastName || '');
+          this.cd.detectChanges();
+        },
+        error: () => {
+          this.chatUserName = this.otherEmail;
+          this.cd.detectChanges();
+        }
+      });
+
+    this.loadMessages();
   }
 
-  // 🔥 FETCH NAME FROM BACKEND
-  this.http.get<any>(`${this.API}/api/auth/user/${encodeURIComponent(this.otherEmail)}`)
-    .subscribe({
-      next: (res) => {
-        this.chatUserName = (res.firstName || '') + ' ' + (res.lastName || '');
-        this.cd.detectChanges();
-      },
-      error: () => {
-        this.chatUser = this.otherEmail;
-      }
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
     });
-
-  this.loadMessages();
-}
+  }
 
   loadMessages() {
     this.http.get<any[]>(
-      `${this.API}/api/messages/${this.myEmail}/${this.otherEmail}`
+      `${this.API}/api/messages/${encodeURIComponent(this.myEmail)}/${encodeURIComponent(this.otherEmail)}`,
+      { headers: this.getAuthHeaders() }
     ).subscribe({
       next: (res) => {
         this.messages = res;
-        console.log("Messages loaded:", res);
         this.cd.detectChanges();
       },
       error: (err) => {
@@ -77,7 +85,7 @@ ngOnInit() {
       text: this.newMessage
     };
 
-    this.http.post(`${this.API}/api/messages/send`, payload)
+    this.http.post(`${this.API}/api/messages/send`, payload, { headers: this.getAuthHeaders() })
       .subscribe({
         next: () => {
           this.newMessage = '';

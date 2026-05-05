@@ -1,25 +1,15 @@
 <div class="dashboard">
 
-  <!-- Header -->
   <div class="dashboard-header">
     <div>
       <h2>Admin Dashboard</h2>
       <p class="role">Role: {{role}}</p>
-      <p ><span class="welcome">Welcome, </span>Admin</p>
-      <p class="admin-gmail"> admin@gmail.com</p>
+      <p><span class="welcome">Welcome, </span>{{getUserName(userEmail)}}</p>
+      <p class="admin-gmail">{{userEmail}}</p>
     </div>
-
-    <button class="logout-btn" (click)="logout()">
-      Logout
-    </button>
+    <button class="logout-btn" (click)="logout()">Logout</button>
   </div>
 
-  <div class="chart-container">
-    <h2>The Column Chart</h2>
-    <canvas id="barChart"></canvas>
-  </div>
-
-  <!-- ADMIN PANEL -->
   <div *ngIf="role === 'Admin'; else userView" class="admin-section">
     <div class="panel">
       <h2 class="section-title">Admin Panel</h2>
@@ -27,90 +17,52 @@
         <h2 class="analytical-header">Analytical Section</h2>
         <button class="anyl-btn" (click)="goAnalyticsSection()">See analytics</button>
       </div>
-  
     </div>
     
-    <!-- Loading -->
-    <div *ngIf="loading" class="info-box">
-      Loading users...
-    </div>
-    
-    <!-- No Users -->
-    <div *ngIf="!loading && users.length === 0" class="info-box">
-      No users found.
-    </div>
-    
-    <table class="msg-table">
-      ...
-    </table>
-    
-    
-    
+    <div *ngIf="loading" class="info-box">Loading users...</div>
     
     <div class="notice-board">
+      <h2 class="section-title">Notice Board</h2>
       
-      <h2 class="section-title">Notice Board (All Messages)</h2>
+      <div *ngIf="messages.length === 0" class="info-box">No messages yet</div>
       
-      <div *ngIf="messages.length === 0" class="info-box">
-        No messages yet
-      </div>
-      
-      <div class="notice-container">   <!-- 🔥 SCROLL CONTAINER -->
+      <div class="notice-container">
         <table class="msg-table">
-          
           <thead>
             <tr>
-              <th>Received</th>
-              <th>Sent</th>
+              <th>Incoming (User to Admin)</th>
+              <th>Admin Broadcasts (To ALL)</th>
             </tr>
           </thead>
-          
           <tbody>
-            
             <tr *ngFor="let msg of messages">
               
-              <!-- LEFT = RECEIVED -->
               <td>
-                <div *ngIf="msg.receiverEmail === userEmail" class="msg-card left">
-                  <p><b>From:</b> {{msg.senderEmail}}</p>
-                  <p>{{msg.text}}</p>
+                <div *ngIf="msg.receiverEmail.toLowerCase().trim() === userEmail" class="msg-card left">
+                  <p><b>From:</b> {{msg.senderName}}</p> <p>{{msg.text}}</p>
                   <span class="time">{{msg.formattedTime}}</span>
                 </div>
               </td>
               
-              <!-- RIGHT = SENT -->
               <td>
-                <div *ngIf="msg.senderEmail === userEmail" class="msg-card right">
-                  <p><b>To:</b> {{msg.receiverEmail}}</p>
-                  <p>{{msg.text}}</p>
+                <div *ngIf="msg.receiverEmail.toLowerCase().trim() === 'all'" class="msg-card right">
+                  <p><b>To:</b> {{msg.receiverName}}</p> <p>{{msg.text}}</p>
                   <span class="time">{{msg.formattedTime}}</span>
                 </div>
               </td>
               
             </tr>
-            
           </tbody>
-          
         </table>
-        
       </div>
     </div>
+
     <p>The User requests are listed below for your review and approval.</p>
-    <!-- USERS -->
     <div *ngIf="!loading && users.length > 0" class="user-list">
-
       <div *ngFor="let user of users" class="user-card">
-
         <div class="user-header">
-          <!-- <h4>{{user.firstName}} {{user.lastName}}</h4> -->
           <p class="name">{{user.name.toUpperCase()}}</p>
-
-          <span class="status"
-            [ngClass]="{
-              'approved': user.status === 'approved',
-              'pending': user.status === 'pending',
-              'rejected': user.status === 'rejected'
-            }">
+          <span class="status" [ngClass]="{'approved': user.status === 'approved', 'pending': user.status === 'pending', 'rejected': user.status === 'rejected'}">
             {{user.status.toUpperCase()}}
           </span>
         </div>
@@ -120,58 +72,27 @@
             <p><b>Role:</b> {{user.role}}</p>
           </div>
         </div>
-
-        <!-- 🔥 ACTIONS -->
         <div class="actions">
-
-          <button 
-            class="approve-btn"
-            (click)="approve(user.email)" 
-            [disabled]="user.status === 'approved'">
-            Approve
-          </button>
-
-          <button 
-            class="reject-btn"
-            (click)="reject(user.email)" 
-            [disabled]="user.status === 'rejected'">
-            Reject
-          </button>
-
-          <!-- 🔥 NEW MESSAGE BUTTON -->
-          <button 
-            class="msg-btn"
-            (click)="messageUser(user.email)">
-            Message
-          </button>
-
+          <button class="approve-btn" (click)="approve(user.email)" [disabled]="user.status === 'approved'">Approve</button>
+          <button class="reject-btn" (click)="reject(user.email)" [disabled]="user.status === 'rejected'">Reject</button>
+          <button class="msg-btn" (click)="messageUser(user.email)">Message</button>
         </div>
-
       </div>
-
     </div>
+
     <div class="notice-msg">
       <h2>Notice all Users</h2>
       <div class="broadcast-section">
-        <button class="chat-btn" (click)="messageAll()">
-          Message All Users
-        </button>
-        <p>Here all the messages will be sent to all users</p>
+        <button class="chat-btn" (click)="messageAll()">Message All Users</button>
+        <p>This message will be broadcasted to every registered user.</p>
       </div>
-
     </div>
-
   </div>
 
-  <!-- USER PANEL -->
   <ng-template #userView>
     <div class="user-panel">
       <h3>User Panel</h3>
-      <p>You are logged in as a User.</p>
       <p>Waiting for admin approval...</p>
     </div>
   </ng-template>
-  <!-- 🔥 FOOTER -->
-
-
 </div>

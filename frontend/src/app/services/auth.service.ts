@@ -45,7 +45,7 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/reject`, { email });
   }
 
-getUserByEmail(email: string) {
+  getUserByEmail(email: string) {
     // Encode email to handle special characters like '@' in the URL[cite: 3]
     const encodedEmail = encodeURIComponent(email);
     return this.http.get<any>(`${this.baseUrl}/user/${encodedEmail}`);

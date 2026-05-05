@@ -6,9 +6,11 @@ import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+// Import the datalabels plugin
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-
-Chart.register(...registerables);
+// Register the plugin globally
+Chart.register(ChartDataLabels, ...registerables);
 
 @Component({
   selector: 'app-analytics',
@@ -21,62 +23,133 @@ export class AnalyticsComponent implements OnInit {
 
   role = '';
   users: any[] = [];
-
   total = 0;
   approved = 0;
   active = 0;
-  messages: any[]=[];
-  constructor(private auth: AuthService, private router: Router, private cd: ChangeDetectorRef) {
+  messages: any[] = [];
 
+  constructor(private auth: AuthService, private router: Router, private cd: ChangeDetectorRef) {
     this.role = localStorage.getItem('role') || '';
   }
 
   ngOnInit() {
-    setTimeout(()=>{
+    setTimeout(() => {
       this.loadUsers();
-      this.loadMessages();   // 🔥 ADD THIS
-    },100)
+      this.loadMessages();
+    }, 100);
   }
 
   loadUsers() {
     this.auth.getUsers().subscribe({
       next: (res: any[]) => {
         this.users = res;
-
         this.total = res.length;
         this.approved = res.filter(u => u.status === 'approved').length;
-
-        // 🔥 SIMPLE ACTIVE LOGIC (you can improve later)
         this.active = res.filter(u => u.status === 'approved').length;
-
-      setTimeout(() => {
-        this.createChart();
-      }, 100);
+        this.cd.detectChanges();
+        setTimeout(() => {
+          this.createChart();
+        }, 100);
       },
       error: (err) => {
         console.error("Analytics load error", err);
       }
     });
   }
-  createMessageChart() {
 
+  createChart() {
+    setTimeout(() => {
+      const existingChart = Chart.getChart('pieChart');
+      if (existingChart) {
+        existingChart.destroy();
+      }
+
+      const dataValues = [
+        this.total,
+        this.approved,
+        this.active,
+        this.total - this.approved
+      ];
+
+      const backgroundColors = ['#3b82f6', '#e2e60e', '#808080', '#ee1053'];
+
+      new Chart('pieChart', {
+        type: 'pie',
+        data: {
+          labels: ['Total Requests', 'Approved Users', 'Active Users', 'Pending Users'],
+          datasets: [{
+            data: dataValues,
+            backgroundColor: backgroundColors
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top', // Moved to top
+              labels: {
+                color: '#ffffff',
+                padding: 15
+              }
+            },
+            // Configuration for labels on top of the chart
+            datalabels: {
+              color: 'white', // Font color
+              anchor: 'center', // Position relative to the slice
+              align: 'center',
+              backgroundColor: (context) => {
+                // Returns the same color as the slice for the box background
+                return context.dataset.backgroundColor ? (context.dataset.backgroundColor as string[])[context.dataIndex] : '#000';
+              },
+              borderRadius: 4, // Makes it look like a box
+              padding: 6,
+              font: {
+                weight: 'bold',
+                size: 12
+              },
+              formatter: (value, context) => {
+                // Shows the Label + Value inside the box
+                const label = context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
+                return `${label}: ${value}`;
+              }
+            }
+          }
+        }
+      });
+    }, 150);
+  }
+
+  // ... rest of your methods (loadMessages, createMessageChart, printPDF, Back) remain the same
+  
+  loadMessages() {
+    this.auth.getAllMessages().subscribe({
+      next: (res: any[]) => {
+        this.messages = res.map(m => ({
+          ...m,
+          formattedTime: m.createdAt ? new Date(m.createdAt).toLocaleString() : 'N/A'
+        }));
+        this.cd.detectChanges();
+        setTimeout(() => {
+          this.createMessageChart();
+        }, 100);
+      },
+      error: (err) => {
+        console.error("Message load error", err);
+      }
+    });
+  }
+
+  createMessageChart() {
     const existing = Chart.getChart('messageChart');
     if (existing) existing.destroy();
-
     const adminEmail = 'admin@gmail.com';
-
-    let toAdmin = 0;
-    let fromAdmin = 0;
-    let others = 0;
+    let toAdmin = 0, fromAdmin = 0, others = 0;
 
     this.messages.forEach(m => {
-      if (m.receiverEmail === adminEmail) {
-        toAdmin++;
-      } else if (m.senderEmail === adminEmail) {
-        fromAdmin++;
-      } else {
-        others++;
-      }
+      if (m.receiverEmail === adminEmail) toAdmin++;
+      else if (m.senderEmail === adminEmail) fromAdmin++;
+      else others++;
     });
 
     new Chart('messageChart', {
@@ -93,143 +166,36 @@ export class AnalyticsComponent implements OnInit {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            labels: { color: '#ffffff' }
-          }
+          legend: { labels: { color: '#ffffff' } },
+          datalabels: { display: false } // Disable datalabels for bar chart if preferred
         },
         scales: {
-          x: {
-            ticks: { color: '#ffffff' }
-          },
-          y: {
-            ticks: { color: '#ffffff' }
-          }
+          x: { ticks: { color: '#ffffff' } },
+          y: { ticks: { color: '#ffffff' } }
         }
       }
     });
   }
-  createChart() {
 
-    setTimeout(() => {
-
-      const existingChart = Chart.getChart('pieChart');
-      if (existingChart) {
-        existingChart.destroy();   // 🔥 prevents duplicate crash
-      }
-
-      const dataValues = [
-        this.total,
-        this.approved,
-        this.active,
-        this.total - this.approved
-      ];
-
-      new Chart('pieChart', {
-        type: 'pie',
-        data: {
-          labels: ['Total Requests', 'Approved Users', 'Active Users', 'Pending Users'],
-          datasets: [{
-            data: dataValues,
-            backgroundColor: ['#3b82f6', '#e2e60e', '#dddbd8', '#ee1053']
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                color: '#ffffff',
-                padding: 15,
-                generateLabels: (chart) => {
-                  const labels = chart.data.labels || [];
-                  const dataset = chart.data.datasets[0];
-                  const colors = dataset.backgroundColor as string[];
-
-                  return labels.map((label: any, i: number) => ({
-                    text: `${label} (${dataset.data[i]})`,
-                    fillStyle: colors[i],
-                    color: "white",
-                    hidden: false,
-                    index: i
-                  }));
-                }
-              }
-            }
-          }
-        }
-      });
-
-    }, 150);   // 🔥 ensures DOM ready
-  }
-  loadMessages() {
-    this.auth.getAllMessages().subscribe({
-      next: (res: any[]) => {
-
-        this.messages = res.map(m => ({
-          ...m,
-          formattedTime: new Date(m.createdAt).toLocaleString()
-        }));
-
-        this.cd.detectChanges();
-
-        // 🔥 ADD THIS
-        setTimeout(() => {
-          this.createMessageChart();
-        }, 100);
-
-      },
-      error: (err) => {
-        console.error("Message load error", err);
-      }
-    });
-  }
   printPDF() {
     const element = document.getElementById('userTable');
-
     if (!element) return;
-
-    html2canvas(element).then(canvas => {
-
+    html2canvas(element, {
+      backgroundColor: '#1e1e2d',
+      scale: 2,
+      useCORS: true
+    }).then(canvas => {
       const imgData = canvas.toDataURL('image/png');
-
       const pdf = new jsPDF('p', 'mm', 'a4');
-
       const imgWidth = 210;
-      const pageHeight = 295;
-
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      let heightLeft = imgHeight;
-
-      let position = 0;
-
-      // 🔥 FIRST PAGE
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      // 🔥 MULTIPLE PAGES SUPPORT
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       pdf.save('Users.pdf');
-
     });
   }
-  Back() {
-    console.log("Clicked to back to dashboard")
-    const role = localStorage.getItem('role');
 
-    if (role === 'Admin') {
-      console.log("goin to dashboard")
-      this.router.navigate(['/dashboard']);
-    } else {
-      this.router.navigate(['/user-dashboard']);
-    }
+  Back() {
+    const role = localStorage.getItem('role');
+    this.router.navigate([role === 'Admin' ? '/dashboard' : '/user-dashboard']);
   }
 }

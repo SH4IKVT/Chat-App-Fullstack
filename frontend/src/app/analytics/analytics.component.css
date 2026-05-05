@@ -146,3 +146,6 @@
 .print-btn:hover {
   background: #059669;
 }
+.table-container td{
+  text-align: left;
+}

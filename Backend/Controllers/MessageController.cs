@@ -11,7 +11,6 @@ public class MessageController : ControllerBase
     private readonly string conn =
         "Host=localhost;Port=5432;Username=postgres;Password=1234;Database=chatdb";
 
-    // 🔥 SEND MESSAGE
     [HttpPost("send")]
     public IActionResult Send([FromBody] Message msg)
     {
@@ -25,17 +24,15 @@ public class MessageController : ControllerBase
         cmd.Parameters.AddWithValue("s", msg.SenderEmail);
         cmd.Parameters.AddWithValue("r", msg.ReceiverEmail);
 
-        // 🔥 ADD THIS LINE
         var encryptedMsg = RsaService.Encrypt(msg.Text);
-
-        // 🔥 REPLACE THIS LINE
         cmd.Parameters.AddWithValue("m", encryptedMsg);
 
         cmd.ExecuteNonQuery();
 
         return Ok(new { message = "Saved" });
     }
-    [AllowAnonymous]   // 🔥 ADD THIS
+
+    [AllowAnonymous]
     [HttpGet("all")]
     public IActionResult GetAllMessages()
     {
@@ -60,11 +57,9 @@ public class MessageController : ControllerBase
                 createdAt = reader.GetDateTime(4)
             });
         }
-        Console.WriteLine("", list.Count);
         return Ok(list);
     }
 
-    // 🔥 GET MESSAGES (FIXED)
     [HttpGet("{u1}/{u2}")]
     public IActionResult GetMessages(string u1, string u2)
     {
@@ -74,19 +69,16 @@ public class MessageController : ControllerBase
         using var con = new NpgsqlConnection(conn);
         con.Open();
 
-        //explain the below line: this query fetches all messages where either: 
-        //1. sender is u1 and receiver is u2
-        //2. sender is u2 and receiver is u1
-        //3. receiver is 'ALL' (this is the crucial part that allows broadcast messages to be fetched for both users) 
         var query = @"
         SELECT * FROM messages
         WHERE 
-            sender_email = @u1
+            (sender_email = @u1 AND receiver_email = @u2)
             OR
-            receiver_email = @u1
+            (sender_email = @u2 AND receiver_email = @u1)
             OR
-            receiver_email = 'ALL'
+            (receiver_email = 'ALL')
         ORDER BY created_at ASC";
+
         using var cmd = new NpgsqlCommand(query, con);
         cmd.Parameters.AddWithValue("u1", u1);
         cmd.Parameters.AddWithValue("u2", u2);

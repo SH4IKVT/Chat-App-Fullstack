@@ -1,43 +1,41 @@
 <div class="dashboard">
 
-  <!-- HEADER (same as admin) -->
   <div class="dashboard-header">
     <div>
-      <h2>Admin </h2>
+      <h2>Admin</h2>
       <p class="role">Role: {{role}}</p>
       <p><span class="welcome">Welcome, </span>Admin</p>
       <p class="admin-gmail">admin@gmail.com</p>
     </div>
-      <button class="goback-btn" (click)="Back()">
+    <button class="goback-btn" (click)="Back()">
       Back to Dashboard
     </button>
   </div>
+
   <h1>User Analytics</h1>
   
-  <!-- BODY -->
   <div class="Piechart-section">
     <h2 class="section-title">Pie Chart</h2>
     <div class="chart-container">
       <canvas id="pieChart"></canvas>
     </div>
   </div>
+
   <h2 class="section-title">Message Analytics</h2>
   <div class="chart-container">
     <canvas id="messageChart"></canvas>
   </div>
-<!-- 🔥 MESSAGE HISTORY SECTION -->
-  <div class="message-history">
 
+  <div class="message-history">
     <h2 class="section-title">Message History</h2>
     <p>Total Messages: {{messages.length}}</p>
-    <div *ngIf="messages.length === 0" class="info-box">
+    
+    <div *ngIf="!messages || messages.length === 0" class="info-box">
       No messages found
     </div>
 
-    <div class="table-container">
-
+    <div class="table-container" *ngIf="messages && messages.length > 0">
       <table class="msg-table">
-
         <thead>
           <tr>
             <th>Sender</th>
@@ -46,7 +44,6 @@
             <th>Time</th>
           </tr>
         </thead>
-
         <tbody>
           <tr *ngFor="let msg of messages">
             <td>{{msg.senderEmail}}</td>
@@ -55,22 +52,19 @@
             <td>{{msg.formattedTime}}</td>
           </tr>
         </tbody>
-
       </table>
-
     </div>
-
   </div>
-<!-- 🔥 USER TABLE SECTION -->
+
   <div class="user-details">
-
     <h2 class="section-title">All Users</h2>
-
     
-    <div class="table-container">
-      
+    <div *ngIf="!users || users.length === 0" class="info-box">
+      No users found
+    </div>
+    
+    <div class="table-container" *ngIf="users && users.length > 0">
       <table class="msg-table" id="userTable">
-        
         <thead>
           <tr>
             <th>Name</th>
@@ -79,7 +73,6 @@
             <th>Status</th>
           </tr>
         </thead>
-        
         <tbody>
           <tr *ngFor="let user of users">
             <td>{{user.name}}</td>
@@ -88,12 +81,11 @@
             <td>{{user.status}}</td>
           </tr>
         </tbody>
-        
       </table>
-      
     </div>
-    
-    <button class="print-btn" (click)="printPDF()">Print as PDF</button>
   </div>
-  
+  <button class="pdf-btn" (click)="printPDF()" style="margin-bottom: 10px; padding: 8px 12px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+    Download Users PDF
+  </button>
+
 </div>
