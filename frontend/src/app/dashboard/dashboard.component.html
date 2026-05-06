@@ -55,6 +55,13 @@
           </tbody>
         </table>
       </div>
+      <div class="notice-msg">
+        <h2>Notice all Users</h2>
+        <div class="broadcast-section">
+          <button class="chat-btn" (click)="messageAll()">Message All Users</button>
+          <p>This message will be broadcasted to every registered user.</p>
+        </div>
+      </div>
     </div>
 
     <p>The User requests are listed below for your review and approval.</p>
@@ -80,13 +87,7 @@
       </div>
     </div>
 
-    <div class="notice-msg">
-      <h2>Notice all Users</h2>
-      <div class="broadcast-section">
-        <button class="chat-btn" (click)="messageAll()">Message All Users</button>
-        <p>This message will be broadcasted to every registered user.</p>
-      </div>
-    </div>
+
   </div>
 
   <ng-template #userView>

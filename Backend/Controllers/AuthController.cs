@@ -101,7 +101,7 @@ namespace ChatApplication.Controllers
                         $"http://localhost:5984/userdb/{user.Email}?rev={rev}",
                         content
                     );
-
+                    //for json web token
                     var key = "THIS_IS_MY_SUPER_SECRET_KEY_12345";
 
                     var claims = new[]

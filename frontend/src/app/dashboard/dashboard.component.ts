@@ -17,6 +17,7 @@ export class DashboardComponent implements OnInit {
   userEmail = '';
   loading = false;
   messages: any[] = [];
+  activeTab: string = 'users';
 
   constructor(private router: Router, private auth: AuthService, private cd: ChangeDetectorRef) {
     // Read from session
