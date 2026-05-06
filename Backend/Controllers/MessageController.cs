@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
+using Microsoft.AspNetCore.SignalR;
 
 [ApiController]
 [Route("api/messages")]
@@ -11,23 +12,41 @@ public class MessageController : ControllerBase
     private readonly string conn =
         "Host=localhost;Port=5432;Username=postgres;Password=1234;Database=chatdb";
 
+    private readonly IHubContext<ChatHub> _hub;
+
+    public MessageController(IHubContext<ChatHub> hub)
+    {
+        _hub = hub;
+    }
     [HttpPost("send")]
-    public IActionResult Send([FromBody] Message msg)
+    public async Task<IActionResult> Send([FromBody] Message msg)
     {
         using var con = new NpgsqlConnection(conn);
         con.Open();
 
-        var query = @"INSERT INTO messages (sender_email, receiver_email, message)
+        var query = @"INSERT INTO messages
+                    (sender_email, receiver_email, message)
                     VALUES (@s, @r, @m)";
 
         using var cmd = new NpgsqlCommand(query, con);
+
         cmd.Parameters.AddWithValue("s", msg.SenderEmail);
         cmd.Parameters.AddWithValue("r", msg.ReceiverEmail);
 
         var encryptedMsg = RsaService.Encrypt(msg.Text);
+
         cmd.Parameters.AddWithValue("m", encryptedMsg);
 
         cmd.ExecuteNonQuery();
+
+        // ✅ SIGNALR REALTIME EVENT
+        await _hub.Clients.All.SendAsync("ReceiveMessage", new
+        {
+            senderEmail = msg.SenderEmail,
+            receiverEmail = msg.ReceiverEmail,
+            text = msg.Text,
+            createdAt = DateTime.Now
+        });
 
         return Ok(new { message = "Saved" });
     }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { SignalrService } from '../services/signalr.service';
 
 @Component({
   selector: 'app-chat',
@@ -27,7 +28,8 @@ export class ChatComponent implements OnInit {
   constructor(
     private cd: ChangeDetectorRef,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private signalR: SignalrService
   ) {}
 
   ngOnInit() {
@@ -87,6 +89,53 @@ export class ChatComponent implements OnInit {
     }
 
     this.loadMessages();
+
+    // ✅ START SIGNALR
+    this.signalR.startConnection();
+
+    this.signalR.onReceiveMessage((msg) => {
+
+      const sender = msg.senderEmail?.toLowerCase();
+      const receiver = msg.receiverEmail?.toLowerCase();
+
+      // ✅ NORMAL CHAT
+      const normalChat =
+
+        (
+          sender === this.myEmail.toLowerCase() &&
+          receiver === this.otherEmail.toLowerCase()
+        )
+
+        ||
+
+        (
+          sender === this.otherEmail.toLowerCase() &&
+          receiver === this.myEmail.toLowerCase()
+        );
+
+      // ✅ ADMIN ALL CHAT
+      const allChat =
+
+        this.otherEmail === 'ALL'
+
+        &&
+
+        (
+          receiver === this.myEmail.toLowerCase()
+
+          ||
+
+          sender === this.myEmail.toLowerCase()
+        );
+
+      if (normalChat || allChat) {
+
+        this.messages.push(msg);
+
+        this.cd.detectChanges();
+      }
+
+    });
   }
 
   private getAuthHeaders(): HttpHeaders {
