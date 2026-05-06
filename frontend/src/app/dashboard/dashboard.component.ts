@@ -51,16 +51,28 @@ export class DashboardComponent implements OnInit {
   loadMessages() {
     this.auth.getAllMessages().subscribe({
       next: (res: any[]) => {
+
         this.messages = res
           .filter(m => {
+            const sender = m.senderEmail?.toLowerCase().trim();
             const receiver = m.receiverEmail?.toLowerCase().trim();
-            return receiver === this.userEmail || receiver === 'all';
+
+            // ✅ CASE 1: Messages sent TO admin (from any user)
+            const receivedByAdmin = receiver === this.userEmail;
+
+            // ✅ CASE 2: Messages sent BY admin TO ALL users
+            const sentByAdminToAll =
+              sender === this.userEmail && receiver === 'all';
+
+            return receivedByAdmin || sentByAdminToAll;
           })
           .map(m => ({
             ...m,
             senderName: this.getUserName(m.senderEmail),
+            receiverName: m.receiverEmail === 'all' ? 'ALL USERS' : this.getUserName(m.receiverEmail),
             formattedTime: new Date(m.createdAt).toLocaleString()
           }));
+
         this.cd.detectChanges();
       }
     });
@@ -75,7 +87,9 @@ export class DashboardComponent implements OnInit {
     sessionStorage.setItem('chatUser', email);
     this.router.navigate(['/chat']);
   }
-
+  reject(email: string){this.auth.reject(email).subscribe(()=>{this.loadUsers()
+    console.log(email+" is rejected")
+  });}
   approve(email: string) { this.auth.approve(email).subscribe(() => this.loadUsers()); }
   messageAll() { sessionStorage.setItem('chatUser', 'ALL'); this.router.navigate(['/chat']); }
   goAnalyticsSection() { this.router.navigate(['/analytics']); }

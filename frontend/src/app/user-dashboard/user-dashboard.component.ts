@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, User } from '../services/auth.service';
 import { Router } from '@angular/router';
@@ -10,8 +10,8 @@ import { Router } from '@angular/router';
   templateUrl: './user-dashboard.component.html',
   styleUrls: ['./user-dashboard.component.css']
 })
-export class UserDashboardComponent implements OnInit {
-
+export class UserDashboardComponent implements OnInit, OnDestroy {
+  private refreshInterval: any;
   user: any = null;
   users: User[] = [];
   loading = true;
@@ -34,9 +34,8 @@ export class UserDashboardComponent implements OnInit {
     private cd: ChangeDetectorRef,
     private router: Router
   ) {}
-
   ngOnInit() {
-    // ✅ FIX: use sessionStorage
+
     const email = sessionStorage.getItem('email');
 
     if (!email) {
@@ -48,6 +47,22 @@ export class UserDashboardComponent implements OnInit {
 
     this.loadUser(email);
     this.loadAllUsers(email);
+
+    // ✅ AUTO REFRESH ANNOUNCEMENTS
+    this.refreshInterval = setInterval(() => {
+
+      if (this.user) {
+        this.loadMessages();
+      }
+
+    }, 3000); // every 3 seconds
+  }
+  ngOnDestroy() {
+
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+
   }
 
   loadUser(email: string) {
@@ -74,34 +89,50 @@ export class UserDashboardComponent implements OnInit {
       }
     });
   }
+// 🔥 LOAD MESSAGES
+loadMessages() {
 
-  // 🔥 LOAD MESSAGES
-  loadMessages() {
-    const email = this.user.email;
+  const email = this.user.email.toLowerCase();
 
-    this.auth.getMessages(email, 'admin@gmail.com').subscribe({
-      next: (res: any[]) => {
+  // ✅ Get ALL messages
+  this.auth.getAllMessages().subscribe({
+    next: (res: any[]) => {
 
-        // ✅ broadcast messages
-        this.broadcastMessages = res
-          .filter(m => m.receiverEmail?.toLowerCase() === 'all')
-          .slice(-4);
-
-        // ✅ personal admin message
-        const personal = res.find(m =>
+      // ✅ NOTICE BOARD
+      // Admin -> ALL only
+      this.broadcastMessages = res
+        .filter(m =>
           m.senderEmail?.toLowerCase() === 'admin@gmail.com' &&
-          m.receiverEmail?.toLowerCase() === email.toLowerCase()
-        );
+          m.receiverEmail?.toLowerCase() === 'all'
+        )
+        .map(m => ({
+          ...m,
+          formattedTime: new Date(m.createdAt).toLocaleString()
+        }))
+        .sort((a, b) =>
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime()
+        )
+        .slice(0, 4);
+      // ✅ PERSONAL ADMIN MESSAGE
+      const personalMessages = res.filter(m =>
+        m.senderEmail?.toLowerCase() === 'admin@gmail.com' &&
+        m.receiverEmail?.toLowerCase() === email
+      );
 
-        this.unreadAdminMessage = personal || null;
+      this.unreadAdminMessage =
+        personalMessages.length > 0
+          ? personalMessages[personalMessages.length - 1]
+          : null;
+      console.log(this.broadcastMessages)
+      this.cd.detectChanges();
+    },
 
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error("Message load error", err);
-      }
-    });
-  }
+    error: (err) => {
+      console.error("Message load error", err);
+    }
+  });
+}
 
   logout() {
     // ✅ FIX: keep consistent

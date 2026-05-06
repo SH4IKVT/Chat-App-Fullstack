@@ -12,7 +12,32 @@
   </div>
 
   <div class="admin-section">
+    <!-- MULTI USER SELECT -->
+    <div *ngIf="isBroadcastMode" class="multi-user-box">
 
+      <h3>Select Users</h3>
+
+      <div class="user-select-list">
+
+        <label *ngFor="let u of allUsers" class="user-option">
+
+          <input
+            type="checkbox"
+            [value]="u.email"
+            (change)="
+              $event.target.checked
+                ? selectedUsers.push(u.email)
+                : selectedUsers = selectedUsers.filter(x => x !== u.email)
+            "
+          />
+
+          {{u.name}} ({{u.email}})
+
+        </label>
+
+      </div>
+
+    </div>
     <div class="chat-card">
 
       <div *ngIf="messages.length === 0" class="empty">
@@ -26,7 +51,13 @@
              'received': msg.senderEmail !== myEmail
            }">
 
-        {{msg.text}}
+          <div *ngIf="msg.multiSend" class="multi-send-info">
+            <b>Sent To:</b> {{msg.receiverEmail}}
+          </div>
+
+          <div>
+            {{msg.text}}
+          </div>
 
       </div>
 

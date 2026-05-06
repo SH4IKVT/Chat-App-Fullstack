@@ -108,3 +108,24 @@
   color: white;
   font-size: 1.8em;
 }
+/* MULTI USER BOX */
+.multi-user-box {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.user-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.user-option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}

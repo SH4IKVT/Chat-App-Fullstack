@@ -14,7 +14,9 @@ import { Router } from '@angular/router';
 export class ChatComponent implements OnInit {
 
   private API = 'http://localhost:5119';
-
+  selectedUsers: string[] = [];
+  allUsers: any[] = [];
+  isBroadcastMode = false;
   messages: any[] = [];
   newMessage: string = '';
 
@@ -29,9 +31,30 @@ export class ChatComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+
     // ✅ Use sessionStorage everywhere
     this.myEmail = sessionStorage.getItem('email') || '';
     this.otherEmail = sessionStorage.getItem('chatUser') || '';
+
+    // ✅ CHECK BROADCAST MODE
+    this.isBroadcastMode = this.otherEmail === 'ALL';
+
+    // ✅ Load users for multi-select
+    if (this.isBroadcastMode) {
+
+      this.http.get<any[]>(`${this.API}/api/auth/users`)
+        .subscribe({
+          next: (res) => {
+
+            this.allUsers = res.filter(u =>
+              u.email.toLowerCase() !== this.myEmail.toLowerCase()
+            );
+
+            this.cd.detectChanges();
+          }
+        });
+
+    }
 
     if (!this.otherEmail) {
       console.error("No chat user found");
@@ -42,17 +65,25 @@ export class ChatComponent implements OnInit {
     if (this.otherEmail === 'ALL') {
       this.chatUserName = 'ALL USERS';
     } else {
-      this.http.get<any>(`${this.API}/api/auth/user/${encodeURIComponent(this.otherEmail)}`)
-        .subscribe({
-          next: (res) => {
-            this.chatUserName = (res.firstName || '') + ' ' + (res.lastName || '');
-            this.cd.detectChanges();
-          },
-          error: () => {
-            this.chatUserName = this.otherEmail;
-            this.cd.detectChanges();
-          }
-        });
+
+      this.http.get<any>(
+        `${this.API}/api/auth/user/${encodeURIComponent(this.otherEmail)}`
+      )
+      .subscribe({
+        next: (res) => {
+
+          this.chatUserName =
+            (res.firstName || '') + ' ' + (res.lastName || '');
+
+          this.cd.detectChanges();
+        },
+
+        error: () => {
+          this.chatUserName = this.otherEmail;
+          this.cd.detectChanges();
+        }
+      });
+
     }
 
     this.loadMessages();
@@ -66,40 +97,129 @@ export class ChatComponent implements OnInit {
   }
 
   loadMessages() {
+
+    // ✅ ALL USERS CHAT
+    if (this.otherEmail === 'ALL') {
+
+      this.http.get<any[]>(
+        `${this.API}/api/messages/all`,
+        { headers: this.getAuthHeaders() }
+      ).subscribe({
+
+        next: (res) => {
+
+          this.messages = res.filter(m => {
+
+            const sender = m.senderEmail?.toLowerCase();
+            const receiver = m.receiverEmail?.toLowerCase();
+            const admin = this.myEmail.toLowerCase();
+
+            // ✅ Admin broadcast messages
+            const broadcast =
+              sender === admin &&
+              receiver === 'all';
+
+            // ✅ Messages sent TO admin
+            const repliesToAdmin =
+              receiver === admin;
+
+            return broadcast || repliesToAdmin;
+
+          });
+          if(this.isBroadcastMode===true){
+
+          }
+
+          this.cd.detectChanges();
+        },
+
+        error: (err) => {
+          console.error("Load ALL chat error", err);
+        }
+
+      });
+
+      return;
+    }
+
+    // ✅ NORMAL USER CHAT
     this.http.get<any[]>(
       `${this.API}/api/messages/${encodeURIComponent(this.myEmail)}/${encodeURIComponent(this.otherEmail)}`,
       { headers: this.getAuthHeaders() }
     ).subscribe({
+
       next: (res) => {
         this.messages = res;
         this.cd.detectChanges();
       },
+
       error: (err) => {
         console.error("Load message error", err);
       }
+
     });
   }
 
   sendMessage() {
+
     if (!this.newMessage.trim()) return;
 
+    // ✅ MULTI USER SEND
+// ✅ MULTI USER SEND
+    if (this.isBroadcastMode && this.selectedUsers.length > 0) {
+
+      const selectedList = [...this.selectedUsers];
+
+      selectedList.forEach(userEmail => {
+
+        const payload = {
+          senderEmail: this.myEmail,
+          receiverEmail: userEmail,
+          text: this.newMessage
+        };
+
+        this.http.post(
+          `${this.API}/api/messages/send`,
+          payload,
+          { headers: this.getAuthHeaders() }
+        ).subscribe();
+
+      });
+
+      // ✅ SHOW IN CHAT WINDOW
+      this.messages.push({
+        senderEmail: this.myEmail,
+        receiverEmail: selectedList.join(', '),
+        text: this.newMessage,
+        multiSend: true
+      });
+
+      this.newMessage = '';
+      this.selectedUsers = [];
+
+      this.cd.detectChanges();
+
+      return;
+    }
+
+    // ✅ NORMAL SEND
     const payload = {
       senderEmail: this.myEmail,
-      receiverEmail: this.otherEmail === 'ALL' ? 'ALL' : this.otherEmail,
+      receiverEmail: this.otherEmail,
       text: this.newMessage
     };
 
-    this.http.post(`${this.API}/api/messages/send`, payload, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
+    this.http.post(
+      `${this.API}/api/messages/send`,
+      payload,
+      { headers: this.getAuthHeaders() }
+    ).subscribe({
       next: () => {
         this.newMessage = '';
         this.loadMessages();
-      },
-      error: (err) => {
-        console.error("Send error", err);
       }
     });
+
   }
 
   closeChat() {
