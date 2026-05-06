@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ChangeDetectorRef } from '@angular/core';
-
+import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { SignalrService } from '../services/signalr.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -18,15 +20,104 @@ export class DashboardComponent implements OnInit {
   loading = false;
   messages: any[] = [];
   activeTab: string = 'users';
+  private API = 'http://localhost:5119';
 
-  constructor(private router: Router, private auth: AuthService, private cd: ChangeDetectorRef) {
-    // Read from session
+  noticeMessages: any[] = [];
+  newNoticeMessage = '';
+
+  selectedUsers: string[] = [];
+  allUsers: any[] = [];
+
+  showUserSelector = false;
+
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+    private cd: ChangeDetectorRef,
+    private http: HttpClient,
+    private signalR: SignalrService
+  ) {
     this.role = sessionStorage.getItem('role') || 'User';
-    this.userEmail = (sessionStorage.getItem('email') || '').toLowerCase().trim();
+    this.userEmail =
+      (sessionStorage.getItem('email') || '')
+      .toLowerCase()
+      .trim();
   }
 
   ngOnInit() {
+
     this.loadUsers();
+
+    // ✅ LOAD USERS FOR MULTI SELECT
+    this.auth.getUsers().subscribe({
+      next: (res: any[]) => {
+
+        this.allUsers = res.filter(u =>
+          u.email.toLowerCase() !== this.userEmail
+        );
+
+        this.cd.detectChanges();
+      }
+    });
+
+    // ✅ LOAD NOTICE CHAT
+    this.loadNoticeMessages();
+
+    // ✅ SIGNALR
+    this.signalR.startConnection();
+
+    this.signalR.onReceiveMessage((msg) => {
+
+      const sender = msg.senderEmail?.toLowerCase();
+      const receiver = msg.receiverEmail?.toLowerCase();
+
+      const isAdminRelated =
+
+        sender === this.userEmail
+        ||
+        receiver === this.userEmail;
+
+      if (isAdminRelated) {
+
+        this.noticeMessages.push(msg);
+
+        this.cd.detectChanges();
+      }
+
+    });
+
+  }
+  setTab(tab: string) {
+    this.activeTab = tab;
+  }
+  toggleUserSelector() {
+    this.showUserSelector = !this.showUserSelector;
+  }
+
+  toggleUser(email: string, checked: boolean) {
+
+    if (checked) {
+
+      if (!this.selectedUsers.includes(email)) {
+        this.selectedUsers.push(email);
+      }
+
+    } else {
+
+      this.selectedUsers =
+        this.selectedUsers.filter(x => x !== email);
+
+    }
+
+  }
+  private getAuthHeaders(): HttpHeaders {
+
+    const token = sessionStorage.getItem('token');
+
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
   }
 
   getUserName(email: string): string {
@@ -48,7 +139,74 @@ export class DashboardComponent implements OnInit {
       error: (err) => { console.error(err); this.loading = false; }
     });
   }
+  loadNoticeMessages() {
 
+    this.http.get<any[]>(
+      `${this.API}/api/messages/all`,
+      { headers: this.getAuthHeaders() }
+    ).subscribe({
+
+      next: (res) => {
+
+        this.noticeMessages = res.filter(m => {
+
+          const sender =
+            m.senderEmail?.toLowerCase();
+
+          const receiver =
+            m.receiverEmail?.toLowerCase();
+
+          return (
+            sender === this.userEmail
+            ||
+            receiver === this.userEmail
+          );
+
+        });
+
+        this.cd.detectChanges();
+      }
+
+    });
+
+  }
+  sendNoticeMessage() {
+
+    if (!this.newNoticeMessage.trim()) return;
+
+    if (this.selectedUsers.length === 0) return;
+
+    const selected = [...this.selectedUsers];
+
+    selected.forEach(email => {
+
+      const payload = {
+        senderEmail: this.userEmail,
+        receiverEmail: email,
+        text: this.newNoticeMessage
+      };
+
+      this.http.post(
+        `${this.API}/api/messages/send`,
+        payload,
+        { headers: this.getAuthHeaders() }
+      ).subscribe();
+
+    });
+
+    this.noticeMessages.push({
+      senderEmail: this.userEmail,
+      receiverEmail: selected.join(', '),
+      text: this.newNoticeMessage,
+      multiSend: true
+    });
+
+    this.newNoticeMessage = '';
+    this.selectedUsers = [];
+
+    this.cd.detectChanges();
+
+  }
   loadMessages() {
     this.auth.getAllMessages().subscribe({
       next: (res: any[]) => {

@@ -1,113 +1,284 @@
 <div class="dashboard">
 
-  <!-- Header -->
+  <!-- =========================
+       HEADER
+  ========================== -->
   <div class="dashboard-header">
-    <div>
-      <h2>User Dashboard</h2>
-      <p class="role">Role: User</p>
-      <p ><span class="welcome">Welcome, </span>{{user?.name}}!</p>
+
+    <!-- LEFT -->
+    <div class="header-left">
+
+      <!-- AVATAR -->
+      <div class="user-avatar-main">
+        {{user?.name?.charAt(0)?.toUpperCase()}}
+      </div>
+
+      <!-- INFO -->
+      <div class="header-info">
+
+        <div class="top-row">
+
+          <h2>
+            User Dashboard
+          </h2>
+
+          <span class="user-badge">
+            USER
+          </span>
+
+        </div>
+
+        <p class="welcome-line">
+
+          <span class="welcome">
+            Welcome,
+          </span>
+
+          <span class="user-name-main">
+            {{user?.name}}
+          </span>
+
+        </p>
+
+        <p class="user-email-main">
+          {{user?.email}}
+        </p>
+
+      </div>
+
     </div>
 
-    <button class="logout-btn" (click)="logout()">
-      Logout
-    </button>
+    <!-- RIGHT -->
+    <div class="header-right">
+
+      <button class="logout-btn"
+              (click)="logout()">
+
+        Logout
+
+      </button>
+
+    </div>
+
   </div>
+
+  <!-- =========================
+       NOTICE BOARD
+  ========================== -->
   <div class="notice-board">
 
-    <h2 class="section-title">Notice Board</h2>
+    <h2 class="section-title">
+      Notice Board
+    </h2>
 
-    <div *ngIf="broadcastMessages.length === 0" class="info-box">
+    <div *ngIf="broadcastMessages.length === 0"
+         class="info-box">
+
       No announcements yet
+
     </div>
 
-    <div *ngFor="let msg of broadcastMessages" class="announcement-msg">
-      <p>{{msg.text.toUpperCase()}}</p>
-      <p class="msg-time">{{msg.createdAt | date:'short'}}</p>
+    <div *ngFor="let msg of broadcastMessages"
+         class="announcement-msg">
+
+      <div class="notice-message">
+
+        <p class="msg-text">
+          {{msg.text}}
+        </p>
+
+        <span class="msg-time">
+          {{msg.createdAt | date:'medium'}}
+        </span>
+
+      </div>
+
     </div>
 
   </div>
 
-  <!-- USER INFO -->
+  <!-- =========================
+       PROFILE
+  ========================== -->
   <div class="user-section">
 
-    <h2 class="section-title">Your Profile</h2>
+    <h2 class="section-title">
+      Your Profile
+    </h2>
 
-    <div *ngIf="loading" class="info-box">
+    <div *ngIf="loading"
+         class="info-box">
+
       Loading your data...
+
     </div>
 
-    <div *ngIf="!loading && user" class="user-card">
+    <div *ngIf="!loading && user"
+         class="user-card profile-card">
 
       <div class="user-header">
-        <h4>{{user.name.toUpperCase()}}</h4>
+
+        <div class="profile-user">
+
+          <div class="mini-avatar">
+            {{user.name.charAt(0).toUpperCase()}}
+          </div>
+
+          <h4>
+            {{user.name}}
+          </h4>
+
+        </div>
 
         <span class="status approved">
           {{user.status?.toUpperCase()}}
         </span>
+
       </div>
 
       <div class="user-details">
-        <p><b>Email:</b> {{user.email}}</p>
-        <p><b>Role:</b> {{user.role}}</p>
+
+        <p>
+          <b>Email:</b>
+          {{user.email}}
+        </p>
+
+        <p>
+          <b>Role:</b>
+          {{user.role}}
+        </p>
+
       </div>
 
     </div>
 
   </div>
+
+  <!-- =========================
+       ADMIN USER
+  ========================== -->
   <div class="admin-user">
-    <h2 class="section-title">Admin User</h2>
+
+    <h2 class="section-title">
+      Admin User
+    </h2>
 
     <div class="user-card">
 
       <div class="user-header">
-        <h4>ADMIN</h4>
+
+        <div class="profile-user">
+
+          <div class="mini-avatar admin-mini">
+            A
+          </div>
+
+          <h4>
+            ADMIN
+          </h4>
+
+        </div>
+
       </div>
 
       <div class="user-details">
-        <p><b>Email:</b> admin@gmail.com</p>
+
+        <p>
+          <b>Email:</b>
+          admin@gmail.com
+        </p>
+
       </div>
 
-      <!-- 🔥 UNREAD MESSAGE -->
-      <div *ngIf="unreadAdminMessage" class="unread-box">
-        You have a new message from Admin
-        <button (click)="messageUser(admin)">Tap to read</button>
+      <!-- UNREAD -->
+      <div *ngIf="unreadAdminMessage"
+           class="unread-box">
+
+        <div>
+          You have a new message from Admin
+        </div>
+
+        <button (click)="messageUser(admin)">
+          Read
+        </button>
+
       </div>
 
       <div class="actions">
-        <button class="msg-btn" (click)="messageUser(admin)">
+
+        <button class="msg-btn"
+                (click)="messageUser(admin)">
+
           Message
+
         </button>
+
       </div>
 
     </div>
+
   </div>
-  <!-- OTHER USERS -->
+
+  <!-- =========================
+       OTHER USERS
+  ========================== -->
   <div class="other-users-section">
 
-    <h2 class="section-title">Other Users</h2>
+    <h2 class="section-title">
+      Other Users
+    </h2>
 
-    <div *ngIf="users.length === 0" class="info-box">
+    <div *ngIf="users.length === 0"
+         class="info-box">
+
       No users available
+
     </div>
 
     <div class="user-list">
 
-      <div *ngFor="let u of users" class="user-card">
+      <div *ngFor="let u of users"
+           class="user-card">
 
         <div class="user-header">
-          <h4>{{u.name.toUpperCase()}}</h4>
-          <i class="fa-solid fa-circle-user"></i>
+
+          <div class="profile-user">
+
+            <div class="mini-avatar">
+              {{u.name.charAt(0).toUpperCase()}}
+            </div>
+
+            <h4>
+              {{u.name}}
+            </h4>
+
+          </div>
+
         </div>
 
         <div class="user-details">
-          <p><b>Email:</b> {{u.email}}</p>
-          <p><b>Role:</b> {{u.role}}</p>
+
+          <p>
+            <b>Email:</b>
+            {{u.email}}
+          </p>
+
+          <p>
+            <b>Role:</b>
+            {{u.role}}
+          </p>
+
         </div>
 
         <div class="actions">
-          <button class="msg-btn" (click)="messageUser(u)">
+
+          <button class="msg-btn"
+                  (click)="messageUser(u)">
+
             Message
+
           </button>
+
         </div>
 
       </div>

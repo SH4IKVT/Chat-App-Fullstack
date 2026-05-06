@@ -184,3 +184,444 @@
   color: #cbd5f5;
   margin-top: 4px;
 }
+/* =========================
+   GLOBAL
+========================= */
+.dashboard {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #1e3c72, #134397);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* =========================
+   HEADER
+========================= */
+.dashboard-header {
+
+  margin: 0% 10%;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255,255,255,0.12);
+
+  border-radius: 22px;
+
+  padding: 24px 30px;
+
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+
+  color: white;
+}
+
+/* LEFT */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* AVATAR */
+.user-avatar-main {
+
+  width: 72px;
+  height: 72px;
+
+  border-radius: 50%;
+
+  background: linear-gradient(
+    135deg,
+    #3b82f6,
+    #2563eb
+  );
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 2rem;
+  font-weight: 700;
+
+  color: white;
+
+  box-shadow: 0 6px 18px rgba(37,99,235,0.4);
+}
+
+/* INFO */
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.top-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-row h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: white;
+}
+
+.user-badge {
+
+  background: rgba(59,130,246,0.2);
+
+  color: #dbeafe;
+
+  padding: 5px 12px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.welcome-line {
+  margin: 0;
+}
+
+.welcome {
+  color: #bfdbfe;
+  font-size: 1.1rem;
+}
+
+.user-name-main {
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.user-email-main {
+  color: #93c5fd;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* LOGOUT */
+.logout-btn {
+
+  background: linear-gradient(
+    135deg,
+    #ef4444,
+    #dc2626
+  );
+
+  color: white;
+
+  padding: 12px 18px;
+
+  border-radius: 14px;
+
+  border: none;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================
+   SECTIONS
+========================= */
+/* NORMAL SECTIONS */
+.user-section,
+.other-users-section,
+.admin-user {
+
+  margin: 30px auto;
+  width: 100%;
+  max-width: 1000px;
+}
+
+/* NOTICE BOARD */
+/* NOTICE BOARD */
+.notice-board {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 25px auto;
+  width: 100%;
+  max-width: 780px;
+  /* ✅ SMALLER HEIGHT */
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.section-title {
+  color: white;
+  margin-bottom: 18px;
+  font-size: 1.5rem;
+}
+
+/* =========================
+   INFO BOX
+========================= */
+.info-box {
+  background: white;
+  padding: 14px;
+  border-radius: 14px;
+  color: #0f172a;
+}
+
+/* =========================
+   NOTICE BOARD
+========================= */
+.notice-board {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.announcement-msg {
+
+  background: rgba(255,255,255,0.1);
+
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255,255,255,0.1);
+
+  border-radius: 16px;
+
+  padding: 18px;
+
+  color: white;
+
+  transition: 0.25s ease;
+}
+
+.announcement-msg:hover {
+  transform: translateY(-3px);
+}
+
+.notice-message {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msg-text {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.msg-time {
+  color: #bfdbfe;
+  font-size: 12px;
+}
+
+/* =========================
+   USER GRID
+========================= */
+.user-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+/* =========================
+   USER CARD
+========================= */
+.user-card {
+
+  background: rgba(255,255,255,0.08);
+
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255,255,255,0.1);
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  color: white;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+
+  transition: 0.25s ease;
+}
+
+.user-card:hover {
+  transform: translateY(-4px);
+}
+
+/* HEADER */
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* PROFILE USER */
+.profile-user {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profile-user h4 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+/* MINI AVATAR */
+.mini-avatar {
+
+  width: 44px;
+  height: 44px;
+
+  border-radius: 50%;
+
+  background: #3b82f6;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 700;
+
+  color: white;
+}
+
+.admin-mini {
+  background: #7c3aed;
+}
+
+/* STATUS */
+.status {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* DETAILS */
+.user-details {
+  margin-top: 18px;
+  line-height: 1.8;
+}
+
+/* ACTIONS */
+.actions {
+  margin-top: 20px;
+}
+
+/* MESSAGE BUTTON */
+.msg-btn {
+
+  width: 100%;
+
+  background: linear-gradient(
+    135deg,
+    #3b82f6,
+    #2563eb
+  );
+
+  color: white;
+
+  border: none;
+
+  padding: 12px;
+
+  border-radius: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.msg-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================
+   UNREAD BOX
+========================= */
+.unread-box {
+
+  margin-top: 18px;
+
+  background: rgba(59,130,246,0.15);
+
+  border: 1px solid rgba(255,255,255,0.1);
+
+  padding: 14px;
+
+  border-radius: 14px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.unread-box button {
+
+  background: #3b82f6;
+
+  color: white;
+
+  border: none;
+
+  padding: 10px 14px;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+
+  .dashboard-header {
+
+    flex-direction: column;
+
+    gap: 20px;
+
+    text-align: center;
+  }
+
+  .header-left {
+    flex-direction: column;
+  }
+
+  .top-row {
+    justify-content: center;
+  }
+
+  .user-list {
+    grid-template-columns: 1fr;
+  }
+
+  .unread-box {
+    flex-direction: column;
+  }
+
+}

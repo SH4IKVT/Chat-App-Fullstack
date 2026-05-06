@@ -1,99 +1,437 @@
 <div class="dashboard">
 
+  <!-- HEADER -->
   <div class="dashboard-header">
-    <div>
-      <h2>Admin Dashboard</h2>
-      <p class="role">Role: {{role}}</p>
-      <p><span class="welcome">Welcome, </span>{{getUserName(userEmail)}}</p>
-      <p class="admin-gmail">{{userEmail}}</p>
+
+    <!-- LEFT -->
+    <div class="header-left">
+
+      <!-- AVATAR -->
+      <div class="admin-avatar">
+      
+      </div>
+
+      <!-- INFO -->
+      <div class="header-info">
+
+        <div class="top-row">
+
+          <h2>
+            Admin Dashboard
+          </h2>
+
+          <span class="admin-badge">
+            ADMIN
+          </span>
+
+        </div>
+
+        <p class="welcome-line">
+
+          <span class="welcome">
+            Welcome,
+          </span>
+
+          <span class="admin-name">
+            Admin
+          </span>
+
+        </p>
+
+        <p class="admin-gmail">
+          {{userEmail}}
+        </p>
+
+      </div>
+
     </div>
-    <button class="logout-btn" (click)="logout()">Logout</button>
+
+    <!-- RIGHT -->
+    <div class="header-right">
+
+      <button class="logout-btn"
+              (click)="logout()">
+
+        Logout
+
+      </button>
+
+    </div>
+
   </div>
 
-  <div *ngIf="role === 'Admin'; else userView" class="admin-section">
+  <!-- ADMIN VIEW -->
+  <div *ngIf="role === 'Admin'; else userView"
+       class="admin-section">
+
+    <!-- TOP PANEL -->
     <div class="panel">
-      <h2 class="section-title">Admin Panel</h2>
+
+      <h2 class="section-title">
+        Admin Panel
+      </h2>
+
       <div class="analytical-section">
-        <h2 class="analytical-header">Analytical Section</h2>
-        <button class="anyl-btn" (click)="goAnalyticsSection()">See analytics</button>
+
+        <h2 class="analytical-header">
+          Analytical Section
+        </h2>
+
+        <button class="anyl-btn"
+                (click)="goAnalyticsSection()">
+
+          See analytics
+
+        </button>
+
       </div>
+
     </div>
-    
-    <div *ngIf="loading" class="info-box">Loading users...</div>
-    
-    <div class="notice-board">
-      <h2 class="section-title">Notice Board</h2>
-      
-      <div *ngIf="messages.length === 0" class="info-box">No messages yet</div>
-      
+
+    <!-- TAB SECTION -->
+    <div class="tab-container">
+
+      <button
+        class="tab-btn"
+        [class.active-tab]="activeTab === 'users'"
+        (click)="setTab('users')">
+
+        User List
+
+      </button>
+
+      <button
+        class="tab-btn"
+        [class.active-tab]="activeTab === 'notice'"
+        (click)="setTab('notice')">
+
+        Notice Board
+
+      </button>
+
+      <button
+        class="tab-btn"
+        [class.active-tab]="activeTab === 'message'"
+        (click)="setTab('message')">
+
+        Notice Message
+
+      </button>
+
+    </div>
+
+    <!-- USER LIST TAB -->
+    <div *ngIf="activeTab === 'users'">
+
+      <p>
+        The User requests are listed below for your review and approval.
+      </p>
+
+      <div *ngIf="loading"
+           class="info-box">
+
+        Loading users...
+
+      </div>
+
+      <div *ngIf="!loading && users.length > 0"
+           class="user-list">
+
+        <div *ngFor="let user of users"
+             class="user-card">
+
+          <!-- USER HEADER -->
+          <div class="user-header">
+
+            <p class="name">
+              {{user.name.toUpperCase()}}
+            </p>
+
+            <span class="status"
+                  [ngClass]="{
+                    'approved': user.status === 'approved',
+                    'pending': user.status === 'pending',
+                    'rejected': user.status === 'rejected'
+                  }">
+
+              {{user.status.toUpperCase()}}
+
+            </span>
+
+          </div>
+
+          <!-- USER INFO -->
+          <div class="user-info">
+
+            <div class="user-details">
+
+              <p>
+                <b>Email:</b> {{user.email}}
+              </p>
+
+              <p>
+                <b>Role:</b> {{user.role}}
+              </p>
+
+            </div>
+
+          </div>
+
+          <!-- ACTIONS -->
+          <div class="actions">
+
+            <button class="approve-btn"
+                    (click)="approve(user.email)"
+                    [disabled]="user.status === 'approved'">
+
+              Approve
+
+            </button>
+
+            <button class="reject-btn"
+                    (click)="reject(user.email)"
+                    [disabled]="user.status === 'rejected'">
+
+              Reject
+
+            </button>
+
+            <button class="msg-btn"
+                    (click)="messageUser(user.email)">
+
+              Message
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- NOTICE BOARD TAB -->
+    <div *ngIf="activeTab === 'notice'"
+         class="notice-board">
+
+      <h2 class="section-title">
+        Notice Board
+      </h2>
+
+      <div *ngIf="messages.length === 0"
+           class="info-box">
+
+        No messages yet
+
+      </div>
+
       <div class="notice-container">
+
         <table class="msg-table">
+
           <thead>
+
             <tr>
               <th>Received</th>
               <th>Sent</th>
             </tr>
+
           </thead>
+
           <tbody>
+
             <tr *ngFor="let msg of messages">
-              
+
+              <!-- RECEIVED -->
               <td>
-                <div *ngIf="msg.receiverEmail.toLowerCase().trim() === userEmail" class="msg-card left">
-                  <p><b>From:</b> {{msg.senderName}}</p> <p>{{msg.text}}</p>
-                  <span class="time">{{msg.formattedTime}}</span>
+
+                <div *ngIf="msg.receiverEmail.toLowerCase().trim() === userEmail"
+                     class="msg-card left">
+
+                  <p>
+                    <b>From:</b>
+                    {{msg.senderName}}
+                  </p>
+
+                  <p>
+                    {{msg.text}}
+                  </p>
+
+                  <span class="time">
+                    {{msg.formattedTime}}
+                  </span>
+
                 </div>
+
               </td>
-              
+
+              <!-- SENT -->
               <td>
-                <div *ngIf="msg.receiverEmail.toLowerCase().trim() === 'all'" class="msg-card right">
-                  <p><b>To:</b> {{msg.receiverName}}</p> <p>{{msg.text}}</p>
-                  <span class="time">{{msg.formattedTime}}</span>
+
+                <div *ngIf="msg.receiverEmail.toLowerCase().trim() === 'all'"
+                     class="msg-card right">
+
+                  <p>
+                    <b>To:</b>
+                    {{msg.receiverName}}
+                  </p>
+
+                  <p>
+                    {{msg.text}}
+                  </p>
+
+                  <span class="time">
+                    {{msg.formattedTime}}
+                  </span>
+
                 </div>
+
               </td>
-              
+
             </tr>
+
           </tbody>
+
         </table>
+
       </div>
-      <div class="notice-msg">
-        <h2>Notice all Users</h2>
-        <div class="broadcast-section">
-          <button class="chat-btn" (click)="messageAll()">Message All Users</button>
-          <p>This message will be broadcasted to every registered user.</p>
-        </div>
-      </div>
+
     </div>
 
-    <p>The User requests are listed below for your review and approval.</p>
-    <div *ngIf="!loading && users.length > 0" class="user-list">
-      <div *ngFor="let user of users" class="user-card">
-        <div class="user-header">
-          <p class="name">{{user.name.toUpperCase()}}</p>
-          <span class="status" [ngClass]="{'approved': user.status === 'approved', 'pending': user.status === 'pending', 'rejected': user.status === 'rejected'}">
-            {{user.status.toUpperCase()}}
+    <!-- NOTICE MESSAGE TAB -->
+<!-- NOTICE MESSAGE TAB -->
+  <div *ngIf="activeTab === 'message'"
+      class="notice-msg">
+
+    <h2 class="section-title">
+      Notice all Users
+    </h2>
+
+    <!-- TOGGLE -->
+    <div class="toggle-section">
+
+      <button class="chat-btn"
+              (click)="toggleUserSelector()">
+
+        {{ showUserSelector ? 'Hide Users' : 'Select Users' }}
+
+      </button>
+
+    </div>
+
+    <!-- USER SELECT -->
+    <div *ngIf="showUserSelector"
+        class="multi-user-box">
+
+      <div class="user-select-list">
+
+    <label *ngFor="let u of allUsers"
+          class="user-option">
+
+      <input
+        type="checkbox"
+        (change)="toggleUser(
+          u.email,
+          $any($event.target).checked
+        )"
+      />
+
+      <div class="user-option-content">
+
+        <div class="user-avatar">
+          {{u.name.charAt(0).toUpperCase()}}
+        </div>
+
+        <div class="user-meta">
+
+          <span class="user-name">
+            {{u.name}}
           </span>
+
+          <span class="user-email">
+            {{u.email}}
+          </span>
+
         </div>
-        <div class="user-info">
-          <div class="user-details">
-            <p><b>Email:</b> {{user.email}}</p>
-            <p><b>Role:</b> {{user.role}}</p>
-          </div>
-        </div>
-        <div class="actions">
-          <button class="approve-btn" (click)="approve(user.email)" [disabled]="user.status === 'approved'">Approve</button>
-          <button class="reject-btn" (click)="reject(user.email)" [disabled]="user.status === 'rejected'">Reject</button>
-          <button class="msg-btn" (click)="messageUser(user.email)">Message</button>
-        </div>
+
       </div>
+
+    </label>
+
+      </div>
+
     </div>
 
+    <!-- CHAT -->
+    <div class="chat-card">
+
+      <div *ngIf="noticeMessages.length === 0"
+          class="empty">
+
+        No messages yet
+
+      </div>
+
+      <div *ngFor="let msg of noticeMessages"
+          [ngClass]="{
+            'message': true,
+            'sent': msg.senderEmail === userEmail,
+            'received': msg.senderEmail !== userEmail
+          }">
+
+        <div *ngIf="msg.multiSend"
+            class="multi-send-info">
+
+          <b>Sent To:</b>
+          {{msg.receiverEmail}}
+
+        </div>
+
+        <div>
+          {{msg.text}}
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- INPUT -->
+    <div class="footer">
+
+      <div class="chat-input">
+
+        <input
+          type="text"
+          [(ngModel)]="newNoticeMessage"
+          placeholder="Type notice message..."
+        />
+
+        <button (click)="sendNoticeMessage()">
+          Send
+        </button>
+
+      </div>
+
+    </div>
 
   </div>
 
+  </div>
+
+  <!-- USER VIEW -->
   <ng-template #userView>
+
     <div class="user-panel">
+
       <h3>User Panel</h3>
-      <p>Waiting for admin approval...</p>
+
+      <p>
+        Waiting for admin approval...
+      </p>
+
     </div>
+
   </ng-template>
+
 </div>
