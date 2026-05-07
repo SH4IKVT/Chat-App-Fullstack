@@ -1,24 +1,113 @@
-<div *ngIf="showError" class="error-popup">
+<!-- ERROR -->
+<div *ngIf="showError"
+     class="error-popup">
+
   {{ errorMsg }}
+
 </div>
-<div class="success-popup" *ngIf="showSuccess">Login successful!</div>
+
+<!-- SUCCESS -->
+<div class="success-popup"
+     *ngIf="showSuccess">
+
+  Login successful!
+
+</div>
+
+<!-- MAIN -->
 <div class="login-container">
 
+  <!-- CARD -->
   <div class="login-card">
-    <h2>Log in account</h2>
 
-    <input [(ngModel)]="loginData.email" placeholder="Email">
-    <input [(ngModel)]="loginData.password" type="password" placeholder="Password">
+    <!-- HEADER -->
+    <div class="login-header">
 
-    <select [(ngModel)]="loginData.role">
-      <option value="User">Login as User</option>
-      <option value="Admin">Login as Admin</option>
-    </select>
+      <div class="login-avatar">
+        L
+      </div>
 
-    <button (click)="login()">Login</button>
+      <h2>
+        Welcome Back
+      </h2>
+
+      <p class="subtitle">
+        Login to continue to the platform
+      </p>
+
+    </div>
+
+    <!-- EMAIL -->
+    <div class="input-group">
+
+      <label>
+        Email
+      </label>
+
+      <input
+        [(ngModel)]="loginData.email"
+        type="email"
+        placeholder="Enter email"
+      />
+
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="input-group">
+
+      <label>
+        Password
+      </label>
+
+      <input
+        [(ngModel)]="loginData.password"
+        type="password"
+        placeholder="Enter password"
+      />
+
+    </div>
+
+    <!-- ROLE -->
+    <div class="input-group">
+
+      <label>
+        Login Role
+      </label>
+
+      <select [(ngModel)]="loginData.role">
+
+        <option value="User">
+          Login as User
+        </option>
+
+        <option value="Admin">
+          Login as Admin
+        </option>
+
+      </select>
+
+    </div>
+
+    <!-- BUTTON -->
+    <button (click)="login()">
+
+      Login
+
+    </button>
+
+    <!-- SIGNUP -->
     <p class="switch">
+
       Don't have an account?
-      <span (click)="router.navigate(['/signup'])">Sign up</span>
+
+      <span (click)="router.navigate(['/signup'])">
+
+        Sign up
+
+      </span>
+
     </p>
+
   </div>
+
 </div>

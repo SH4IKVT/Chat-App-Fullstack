@@ -1,48 +1,149 @@
 <div class="auth-container">
 
   <!-- POPUP -->
-  <div *ngIf="showError" class="popup">
+  <div *ngIf="showError"
+       class="popup">
+
     {{ errorMsg }}
+
   </div>
 
+  <!-- CARD -->
   <div class="auth-card">
 
-    <h2>Create Account</h2>
+    <!-- HEADER -->
+    <div class="signup-header">
 
+      <div class="signup-avatar">
+        S
+      </div>
+
+      <h2>Create Account</h2>
+
+      <p>
+        Register to access the chat platform
+      </p>
+
+    </div>
+
+    <!-- FORM -->
     <form (ngSubmit)="signup()">
 
-      <input type="text"
-             placeholder="First Name"
-             [(ngModel)]="signupData.firstName"
-             name="firstName"
-             required />
+      <!-- FIRST NAME -->
+      <div class="input-group">
 
-      <input type="text"
-             placeholder="Last Name"
-             [(ngModel)]="signupData.lastName"
-             name="lastName"
-             required />
+        <label>
+          First Name
+        </label>
 
-      <input type="email"
-             placeholder="Email"
-             [(ngModel)]="signupData.email"
-             name="email"
-             required />
+        <input
+          type="text"
+          placeholder="Enter first name"
+          [(ngModel)]="signupData.firstName"
+          name="firstName"
+          required
+        />
 
-      <input type="password"
-             placeholder="Password"
-             [(ngModel)]="signupData.password"
-             name="password"
-             required />
+      </div>
 
-      <button type="submit">Register</button>
+      <!-- LAST NAME -->
+      <div class="input-group">
+
+        <label>
+          Last Name
+        </label>
+
+        <input
+          type="text"
+          placeholder="Enter last name"
+          [(ngModel)]="signupData.lastName"
+          name="lastName"
+          required
+        />
+
+      </div>
+
+      <!-- EMAIL -->
+      <div class="input-group">
+
+        <label>
+          Email
+        </label>
+
+        <input
+          type="email"
+          placeholder="Enter email"
+          [(ngModel)]="signupData.email"
+          name="email"
+          required
+        />
+
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="input-group">
+
+        <label>
+          Password
+        </label>
+
+        <input
+          type="password"
+          placeholder="Enter password"
+          [(ngModel)]="signupData.password"
+          name="password"
+          required
+        />
+
+      </div>
+
+      <!-- CONFIRM PASSWORD -->
+      <div class="input-group">
+
+        <label>
+          Confirm Password
+        </label>
+
+        <input
+          type="password"
+          placeholder="Confirm password"
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          required
+        />
+
+      </div>
+
+      <!-- PASSWORD ERROR -->
+      <div *ngIf="passwordMismatch"
+           class="password-error">
+
+        Passwords do not match
+
+      </div>
+
+      <!-- BUTTON -->
+      <button type="submit">
+
+        Register
+
+      </button>
 
     </form>
 
+    <!-- LOGIN -->
     <p class="switch">
+
       Already have an account?
-      <span (click)="router.navigate(['/'])">Login</span>
+
+      <span (click)="router.navigate(['/'])">
+
+        Login
+
+      </span>
+
     </p>
 
   </div>
+
 </div>

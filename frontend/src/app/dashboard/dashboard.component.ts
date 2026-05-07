@@ -70,19 +70,37 @@ export class DashboardComponent implements OnInit {
 
       const sender = msg.senderEmail?.toLowerCase();
       const receiver = msg.receiverEmail?.toLowerCase();
-
       const isAdminRelated =
 
-        sender === this.userEmail
-        ||
-        receiver === this.userEmail;
+        (
+          sender !== this.userEmail
+          &&
+          receiver === this.userEmail
+        );
+    if (isAdminRelated) {
 
-      if (isAdminRelated) {
+      // ✅ Prevent duplicate grouped admin messages
+      const alreadyExists = this.noticeMessages.some(m =>
+
+        m.text === msg.text &&
+
+        m.senderEmail === msg.senderEmail &&
+
+        (
+          new Date(m.createdAt).getTime() ===
+          new Date(msg.createdAt).getTime()
+        )
+      );
+
+      if (!alreadyExists) {
 
         this.noticeMessages.push(msg);
 
         this.cd.detectChanges();
+
       }
+
+    }
 
     });
 
@@ -148,7 +166,7 @@ export class DashboardComponent implements OnInit {
 
       next: (res) => {
 
-        this.noticeMessages = res.filter(m => {
+        const filtered = res.filter(m => {
 
           const sender =
             m.senderEmail?.toLowerCase();
@@ -164,19 +182,86 @@ export class DashboardComponent implements OnInit {
 
         });
 
+        // ✅ GROUP ADMIN MULTI-SEND MESSAGES
+        const grouped: any[] = [];
+
+        filtered.forEach(msg => {
+
+          // ONLY group admin sent messages
+          if (msg.senderEmail?.toLowerCase() === this.userEmail) {
+
+            const existing = grouped.find(g =>
+
+              g.text === msg.text &&
+
+              Math.abs(
+                new Date(g.createdAt).getTime() -
+                new Date(msg.createdAt).getTime()
+              ) < 2000 // within 2 seconds
+            );
+
+            if (existing) {
+
+              existing.receiverEmail +=
+                `, ${msg.receiverEmail}`;
+
+            } else {
+
+              grouped.push({
+                ...msg,
+                multiSend: true
+              });
+
+            }
+
+          } else {
+
+            grouped.push(msg);
+
+          }
+
+        });
+
+      this.noticeMessages = grouped.sort((a, b) =>
+
+        new Date(a.createdAt).getTime() -
+        new Date(b.createdAt).getTime()
+
+      );
+
         this.cd.detectChanges();
+        this.scrollToBottom();
       }
 
     });
+
+  }
+  scrollToBottom() {
+
+    setTimeout(() => {
+
+      const container =
+        document.getElementById('chatCard');
+
+      if (container) {
+
+        container.scrollTop =
+          container.scrollHeight;
+
+      }
+
+    }, 100);
 
   }
   sendNoticeMessage() {
 
     if (!this.newNoticeMessage.trim()) return;
 
-    if (this.selectedUsers.length === 0) return;
+    const selected = this.selectedUsers.length > 0
 
-    const selected = [...this.selectedUsers];
+    ? [...this.selectedUsers]
+
+    : this.allUsers.map(u => u.email);
 
     selected.forEach(email => {
 
@@ -195,18 +280,25 @@ export class DashboardComponent implements OnInit {
     });
 
     this.noticeMessages.push({
+
       senderEmail: this.userEmail,
+
       receiverEmail: selected.join(', '),
+
       text: this.newNoticeMessage,
-      multiSend: true
+
+      multiSend: true,
+
+      createdAt: new Date()
+
     });
 
     this.newNoticeMessage = '';
     this.selectedUsers = [];
 
-    this.cd.detectChanges();
-
+    this.loadNoticeMessages();
   }
+  
   loadMessages() {
     this.auth.getAllMessages().subscribe({
       next: (res: any[]) => {
@@ -233,6 +325,7 @@ export class DashboardComponent implements OnInit {
           }));
 
         this.cd.detectChanges();
+        this.scrollToBottom();
       }
     });
   }

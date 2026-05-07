@@ -21,8 +21,13 @@ export class SignupComponent {
     password: ''
   };
 
+  confirmPassword = '';
+
   errorMsg: string = '';
+
   showError: boolean = false;
+
+  passwordMismatch = false;
 
   constructor(
     private auth: AuthService,
@@ -31,38 +36,80 @@ export class SignupComponent {
   ) {}
 
   signup() {
-    this.auth.signup(this.signupData).subscribe({
-      next: (res: any) => {
-        console.log("Signup success:", res);
 
-        this.errorMsg = "Signup successful! Wait for admin approval.";
+    // ✅ PASSWORD CHECK
+    if (
+      this.signupData.password !==
+      this.confirmPassword
+    ) {
+
+      this.passwordMismatch = true;
+
+      return;
+    }
+
+    this.passwordMismatch = false;
+
+    // ✅ SEND ONLY REAL DATA
+    const payload = {
+      firstName: this.signupData.firstName,
+      lastName: this.signupData.lastName,
+      email: this.signupData.email,
+      password: this.signupData.password
+    };
+
+    this.auth.signup(payload).subscribe({
+
+      next: (res: any) => {
+
+        this.errorMsg =
+          "Signup successful! Wait for admin approval.";
+
         this.showError = true;
 
         this.cd.detectChanges();
 
         setTimeout(() => {
+
           this.showError = false;
+
           this.router.navigate(['/']);
+
         }, 2500);
+
       },
 
       error: (err) => {
-        console.error("Signup error:", err);
 
         if (err.status === 400) {
-          this.errorMsg = err.error?.message || "User already exists";
+
+          this.errorMsg =
+            err.error?.message ||
+            "User already exists";
+
         } else {
-          this.errorMsg = "Something went wrong";
+
+          this.errorMsg =
+            "Something went wrong";
+
         }
 
         this.showError = true;
+
         this.cd.detectChanges();
 
         setTimeout(() => {
+
           this.showError = false;
+
           this.cd.detectChanges();
+
         }, 3000);
+
       }
+
     });
+
   }
+
 }

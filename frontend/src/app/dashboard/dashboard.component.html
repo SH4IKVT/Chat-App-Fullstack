@@ -364,7 +364,12 @@
     </div>
 
     <!-- CHAT -->
-    <div class="chat-card">
+<!-- CHAT WRAPPER -->
+<div class="chat-wrapper">
+
+  <!-- CHAT BODY -->
+    <div class="chat-card"
+        id="chatCard">
 
       <div *ngIf="noticeMessages.length === 0"
           class="empty">
@@ -414,6 +419,8 @@
       </div>
 
     </div>
+
+  </div>
 
   </div>
 
