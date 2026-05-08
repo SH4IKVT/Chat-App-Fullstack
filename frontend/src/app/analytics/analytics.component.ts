@@ -22,14 +22,46 @@ export class AnalyticsComponent implements OnInit {
   users: any[] = [];
   total = 0; approved = 0; active = 0;
   messages: any[] = [];
+  activeTab: string = 'pie';
 
   constructor(private auth: AuthService, private router: Router, private cd: ChangeDetectorRef) {
     this.role = sessionStorage.getItem('role') || ''; // Read from session
   }
 
   ngOnInit() {
-    this.loadUsers();
-    this.loadMessages();
+  this.loadUsers();
+
+  this.loadMessages();
+
+  setTimeout(() => {
+
+    this.createChart();
+
+  }, 200);   
+  }
+  setTab(tab: string) {
+
+    this.activeTab = tab;
+
+    this.cd.detectChanges();
+
+    // ✅ Re-render charts after tab visible
+    setTimeout(() => {
+
+      if (tab === 'pie') {
+
+        this.createChart();
+
+      }
+
+      if (tab === 'messageAnalytics') {
+
+        this.createMessageChart();
+
+      }
+
+    }, 100);
+
   }
 
   loadUsers() {
@@ -48,6 +80,10 @@ export class AnalyticsComponent implements OnInit {
   createChart() {
     const existingChart = Chart.getChart('pieChart');
     if (existingChart) existingChart.destroy();
+    const canvas =
+      document.getElementById('pieChart');
+
+    if (!canvas) return;
     new Chart('pieChart', {
       type: 'pie',
       data: {
@@ -96,14 +132,65 @@ export class AnalyticsComponent implements OnInit {
       else if (m.senderEmail === adminEmail) fromAdmin++;
       else others++;
     });
+    const canvas =
+      document.getElementById('messageChart');
 
+    if (!canvas) return;
     new Chart('messageChart', {
       type: 'bar',
       data: {
         labels: ['To Admin', 'From Admin', 'Others'],
         datasets: [{ label: 'Message Stats', data: [toAdmin, fromAdmin, others], backgroundColor: ['#3b82f6', '#10b981', '#ef4444'] }]
       },
-      options: { scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' } } } }
+      options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          legend: {
+
+            labels: {
+              color: '#fff'
+            }
+
+          }
+
+        },
+
+        scales: {
+
+          x: {
+
+            ticks: {
+              color: '#fff'
+            },
+
+            grid: {
+              color: 'rgba(255,255,255,0.08)'
+            }
+
+          },
+
+          y: {
+
+            beginAtZero: true,
+
+            ticks: {
+              color: '#fff'
+            },
+
+            grid: {
+              color: 'rgba(255,255,255,0.08)'
+            }
+
+          }
+
+        }
+
+      }
     });
   }
 

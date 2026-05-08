@@ -19,6 +19,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
 
   broadcastMessages: any[] = [];
   unreadAdminMessage: any = null;
+  activeTab: string = 'notice';
 
   admin: User = {
     name: 'ADMIN USER',
@@ -56,6 +57,9 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
       }
 
     }, 3000); // every 3 seconds
+  }
+  setTab(tab: string) {
+    this.activeTab = tab;
   }
   ngOnDestroy() {
 

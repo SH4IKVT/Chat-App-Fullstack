@@ -15,6 +15,53 @@
   align-items: center;
   color: white;
 }
+/* =========================
+   TABS
+========================= */
+/* =========================
+   TABS
+========================= */
+.tab-container {
+  display: flex;
+  gap: 14px;
+  margin: 1% 10%;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+
+  background: rgba(255,255,255,0.12);
+
+  color: white;
+
+  padding: 12px 20px;
+
+  border-radius: 14px;
+
+  border: 1px solid rgba(255,255,255,0.1);
+
+  cursor: pointer;
+
+  font-weight: 600;
+
+  transition: 0.25s ease;
+
+  backdrop-filter: blur(8px);
+}
+
+.tab-btn:hover {
+
+  background: rgba(255,255,255,0.22);
+
+  transform: translateY(-2px);
+}
+
+.active-tab {
+
+  background: #3b82f6;
+
+  box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+}
 .role {
   color: #3b82f6;
 }
@@ -350,6 +397,9 @@
 }
 
 /* NOTICE BOARD */
+
+
+
 /* NOTICE BOARD */
 .notice-board {
   display: flex;
@@ -479,7 +529,9 @@
   margin: 0;
   font-size: 1.2rem;
 }
-
+.profile-tab{
+  margin: 1% 10%;
+}
 /* MINI AVATAR */
 .mini-avatar {
 

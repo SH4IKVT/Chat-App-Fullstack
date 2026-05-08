@@ -36,6 +36,7 @@ export class ChatComponent implements OnInit {
 
     // ✅ Use sessionStorage everywhere
     this.myEmail = sessionStorage.getItem('email') || '';
+    // from session storage it is taken
     this.otherEmail = sessionStorage.getItem('chatUser') || '';
 
     // ✅ CHECK BROADCAST MODE
@@ -196,7 +197,6 @@ export class ChatComponent implements OnInit {
       `${this.API}/api/messages/${encodeURIComponent(this.myEmail)}/${encodeURIComponent(this.otherEmail)}`,
       { headers: this.getAuthHeaders() }
     ).subscribe({
-
       next: (res) => {
         this.messages = res;
         this.cd.detectChanges();
@@ -218,7 +218,7 @@ export class ChatComponent implements OnInit {
     if (this.isBroadcastMode && this.selectedUsers.length > 0) {
 
       const selectedList = [...this.selectedUsers];
-
+      console.log(this.selectedUsers);
       selectedList.forEach(userEmail => {
 
         const payload = {
@@ -257,7 +257,7 @@ export class ChatComponent implements OnInit {
       receiverEmail: this.otherEmail,
       text: this.newMessage
     };
-
+    //sending the message with the header attached
     this.http.post(
       `${this.API}/api/messages/send`,
       payload,

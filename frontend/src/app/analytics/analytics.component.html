@@ -1,95 +1,293 @@
 <div class="dashboard">
 
+  <!-- HEADER -->
   <div class="dashboard-header">
-    <div>
-      <h2>Admin</h2>
-      <p class="role">Role: {{role}}</p>
-      <p><span class="welcome">Welcome, </span>Admin</p>
-      <p class="admin-gmail">admin@gmail.com</p>
+
+    <div class="header-left">
+
+      <div class="admin-avatar">
+        A
+      </div>
+
+      <div class="header-info">
+
+        <div class="top-row">
+
+          <h2>
+            Analytics Dashboard
+          </h2>
+
+          <span class="admin-badge">
+            ADMIN
+          </span>
+
+        </div>
+
+        <p class="welcome-line">
+
+          <span class="welcome">
+            Welcome,
+          </span>
+
+          <span class="admin-name">
+            Admin
+          </span>
+
+        </p>
+
+        <p class="admin-gmail">
+          admin@gmail.com
+        </p>
+
+      </div>
+
     </div>
-    <button class="goback-btn" (click)="Back()">
+
+    <button class="goback-btn"
+            (click)="Back()">
+
       Back to Dashboard
+
     </button>
+
   </div>
 
-  <h1>User Analytics</h1>
-  
-  <div class="Piechart-section">
-    <h2 class="section-title">Pie Chart</h2>
+  <!-- TABS -->
+  <div class="tab-container">
+
+    <button
+      class="tab-btn"
+      [class.active-tab]="activeTab === 'pie'"
+      (click)="setTab('pie')">
+
+      Pie Chart
+
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active-tab]="activeTab === 'messageAnalytics'"
+      (click)="setTab('messageAnalytics')">
+
+      Message Analytics
+
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active-tab]="activeTab === 'history'"
+      (click)="setTab('history')">
+
+      Message History
+
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active-tab]="activeTab === 'users'"
+      (click)="setTab('users')">
+
+      Users Data
+
+    </button>
+
+  </div>
+
+  <!-- PIE CHART -->
+  <div *ngIf="activeTab === 'pie'"
+       class="analytics-card">
+
+    <h2 class="section-title">
+      User Analytics
+    </h2>
+
     <div class="chart-container">
       <canvas id="pieChart"></canvas>
     </div>
+
   </div>
 
-  <h2 class="section-title">Message Analytics</h2>
-  <div class="chart-container">
+  <!-- MESSAGE ANALYTICS -->
+  <div *ngIf="activeTab === 'messageAnalytics'"
+       class="analytics-card">
+
+    <h2 class="section-title">
+      Message Analytics
+    </h2>
+
+  <div class="message-chart-container">
     <canvas id="messageChart"></canvas>
   </div>
 
-  <div class="message-history">
-    <h2 class="section-title">Message History</h2>
-    <p>Total Messages: {{messages.length}}</p>
-    
-    <div *ngIf="!messages || messages.length === 0" class="info-box">
+  </div>
+
+  <!-- MESSAGE HISTORY -->
+  <div *ngIf="activeTab === 'history'"
+       class="analytics-card">
+
+    <div class="table-header">
+
+      <div>
+
+        <h2 class="section-title">
+          Message History
+        </h2>
+
+        <p class="table-subtitle">
+          Total Messages: {{messages.length}}
+        </p>
+
+      </div>
+
+    </div>
+
+    <div *ngIf="!messages || messages.length === 0"
+         class="info-box">
+
       No messages found
+
     </div>
 
-    <div class="table-container" *ngIf="messages && messages.length > 0">
-      <table class="msg-table">
+    <div class="table-container"
+         *ngIf="messages && messages.length > 0">
+
+      <table class="modern-table">
+
         <thead>
+
           <tr>
+
             <th>Sender</th>
+
             <th>Receiver</th>
+
             <th>Message</th>
+
             <th>Time</th>
+
           </tr>
+
         </thead>
+
         <tbody>
+
           <tr *ngFor="let msg of messages">
+
             <td>{{msg.senderEmail}}</td>
+
             <td>{{msg.receiverEmail}}</td>
+
             <td>{{msg.text}}</td>
+
             <td>{{msg.formattedTime}}</td>
+
           </tr>
+
         </tbody>
+
       </table>
+
     </div>
+
   </div>
 
-  <div class="user-details">
-    <h2 class="section-title">All Users</h2>
-    
-    <div *ngIf="!users || users.length === 0" class="info-box">
+  <!-- USERS DATA -->
+  <div *ngIf="activeTab === 'users'"
+       class="analytics-card">
+
+    <div class="table-header">
+
+      <div>
+
+        <h2 class="section-title">
+          Users Data
+        </h2>
+
+        <p class="table-subtitle">
+          Total Users: {{users.length}}
+        </p>
+
+      </div>
+
+      <div class="action-buttons">
+
+        <button class="pdf-btn"
+                (click)="printPDF()">
+
+          Download PDF
+
+        </button>
+
+        <button class="print-btn"
+                (click)="printTable()">
+
+          Print Table
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <div *ngIf="!users || users.length === 0"
+         class="info-box">
+
       No users found
+
     </div>
-    
-    <div class="table-container" *ngIf="users && users.length > 0">
-      <table class="msg-table" id="userTable">
+
+    <div class="table-container"
+         *ngIf="users && users.length > 0">
+
+      <table class="modern-table"
+             id="userTable">
+
         <thead>
+
           <tr>
+
             <th>Name</th>
+
             <th>Email</th>
+
             <th>Role</th>
+
             <th>Status</th>
+
           </tr>
+
         </thead>
+
         <tbody>
+
           <tr *ngFor="let user of users">
+
             <td>{{user.name}}</td>
+
             <td>{{user.email}}</td>
+
             <td>{{user.role}}</td>
-            <td>{{user.status}}</td>
+
+            <td>
+
+              <span
+                class="status-badge"
+                [ngClass]="user.status">
+
+                {{user.status}}
+
+              </span>
+
+            </td>
+
           </tr>
+
         </tbody>
+
       </table>
+
     </div>
+
   </div>
-  <button class="pdf-btn" (click)="printPDF()" style="margin-bottom: 10px; padding: 8px 12px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
-    Download Users PDF
-  </button>
-  <button class="print-btn" (click)="printTable()" 
-    style="margin-left: 10px; margin-bottom: 10px; padding: 8px 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
-    Print Table
-  </button>
 
 </div>

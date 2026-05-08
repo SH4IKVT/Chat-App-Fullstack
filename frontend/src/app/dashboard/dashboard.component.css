@@ -279,10 +279,13 @@ button:disabled {
 
   margin: 0 auto;
 }
+/* NOTICE CONTAINER */
 .notice-container {
-  max-height: 450px;
+  max-height: 400px;
   overflow-y: auto;
+  overflow-x: hidden;
   border-radius: 14px;
+  width: 100%;
 }
 
 .notice-container::-webkit-scrollbar {

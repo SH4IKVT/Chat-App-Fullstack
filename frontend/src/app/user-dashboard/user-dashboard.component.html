@@ -1,19 +1,14 @@
 <div class="dashboard">
 
-  <!-- =========================
-       HEADER
-  ========================== -->
+  <!-- HEADER -->
   <div class="dashboard-header">
 
-    <!-- LEFT -->
     <div class="header-left">
 
-      <!-- AVATAR -->
       <div class="user-avatar-main">
         {{user?.name?.charAt(0)?.toUpperCase()}}
       </div>
 
-      <!-- INFO -->
       <div class="header-info">
 
         <div class="top-row">
@@ -48,7 +43,6 @@
 
     </div>
 
-    <!-- RIGHT -->
     <div class="header-right">
 
       <button class="logout-btn"
@@ -63,9 +57,44 @@
   </div>
 
   <!-- =========================
-       NOTICE BOARD
+       TABS
   ========================== -->
-  <div class="notice-board">
+  <div class="tab-container">
+
+    <button
+      class="tab-btn"
+      [class.active-tab]="activeTab === 'notice'"
+      (click)="setTab('notice')">
+
+      Notice Board
+
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active-tab]="activeTab === 'profile'"
+      (click)="setTab('profile')">
+
+      Profiles
+
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active-tab]="activeTab === 'users'"
+      (click)="setTab('users')">
+
+      Other Users
+
+    </button>
+
+  </div>
+
+  <!-- =========================
+       NOTICE TAB
+  ========================== -->
+  <div *ngIf="activeTab === 'notice'"
+       class="notice-board">
 
     <h2 class="section-title">
       Notice Board
@@ -98,55 +127,124 @@
   </div>
 
   <!-- =========================
-       PROFILE
+       PROFILE TAB
   ========================== -->
-  <div class="user-section">
+  <div *ngIf="activeTab === 'profile'"
+       class="profile-tab">
 
-    <h2 class="section-title">
-      Your Profile
-    </h2>
+    <!-- YOUR PROFILE -->
+    <div class="user-section">
 
-    <div *ngIf="loading"
-         class="info-box">
+      <h2 class="section-title">
+        Your Profile
+      </h2>
 
-      Loading your data...
+      <div *ngIf="loading"
+           class="info-box">
 
-    </div>
-
-    <div *ngIf="!loading && user"
-         class="user-card profile-card">
-
-      <div class="user-header">
-
-        <div class="profile-user">
-
-          <div class="mini-avatar">
-            {{user.name.charAt(0).toUpperCase()}}
-          </div>
-
-          <h4>
-            {{user.name}}
-          </h4>
-
-        </div>
-
-        <span class="status approved">
-          {{user.status?.toUpperCase()}}
-        </span>
+        Loading your data...
 
       </div>
 
-      <div class="user-details">
+      <div *ngIf="!loading && user"
+           class="user-card profile-card">
 
-        <p>
-          <b>Email:</b>
-          {{user.email}}
-        </p>
+        <div class="user-header">
 
-        <p>
-          <b>Role:</b>
-          {{user.role}}
-        </p>
+          <div class="profile-user">
+
+            <div class="mini-avatar">
+              {{user.name.charAt(0).toUpperCase()}}
+            </div>
+
+            <h4>
+              {{user.name}}
+            </h4>
+
+          </div>
+
+          <span class="status approved">
+            {{user.status?.toUpperCase()}}
+          </span>
+
+        </div>
+
+        <div class="user-details">
+
+          <p>
+            <b>Email:</b>
+            {{user.email}}
+          </p>
+
+          <p>
+            <b>Role:</b>
+            {{user.role}}
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ADMIN PROFILE -->
+    <div class="admin-user">
+
+      <h2 class="section-title">
+        Admin Profile
+      </h2>
+
+      <div class="user-card">
+
+        <div class="user-header">
+
+          <div class="profile-user">
+
+            <div class="mini-avatar admin-mini">
+              A
+            </div>
+
+            <h4>
+              ADMIN
+            </h4>
+
+          </div>
+
+        </div>
+
+        <div class="user-details">
+
+          <p>
+            <b>Email:</b>
+            admin@gmail.com
+          </p>
+
+        </div>
+
+        <!-- UNREAD -->
+        <div *ngIf="unreadAdminMessage"
+             class="unread-box">
+
+          <div>
+            You have a new message from Admin
+          </div>
+
+          <button (click)="messageUser(admin)">
+            Read
+          </button>
+
+        </div>
+
+        <div class="actions">
+
+          <button class="msg-btn"
+                  (click)="messageUser(admin)">
+
+            Message
+
+          </button>
+
+        </div>
 
       </div>
 
@@ -155,74 +253,10 @@
   </div>
 
   <!-- =========================
-       ADMIN USER
+       USERS TAB
   ========================== -->
-  <div class="admin-user">
-
-    <h2 class="section-title">
-      Admin User
-    </h2>
-
-    <div class="user-card">
-
-      <div class="user-header">
-
-        <div class="profile-user">
-
-          <div class="mini-avatar admin-mini">
-            A
-          </div>
-
-          <h4>
-            ADMIN
-          </h4>
-
-        </div>
-
-      </div>
-
-      <div class="user-details">
-
-        <p>
-          <b>Email:</b>
-          admin@gmail.com
-        </p>
-
-      </div>
-
-      <!-- UNREAD -->
-      <div *ngIf="unreadAdminMessage"
-           class="unread-box">
-
-        <div>
-          You have a new message from Admin
-        </div>
-
-        <button (click)="messageUser(admin)">
-          Read
-        </button>
-
-      </div>
-
-      <div class="actions">
-
-        <button class="msg-btn"
-                (click)="messageUser(admin)">
-
-          Message
-
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- =========================
-       OTHER USERS
-  ========================== -->
-  <div class="other-users-section">
+  <div *ngIf="activeTab === 'users'"
+       class="other-users-section">
 
     <h2 class="section-title">
       Other Users
