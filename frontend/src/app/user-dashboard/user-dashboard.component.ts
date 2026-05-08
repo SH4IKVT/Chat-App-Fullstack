@@ -1,6 +1,17 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
-import { AuthService, User } from '../services/auth.service';
+
+import {
+  AuthService,
+  User
+} from '../services/auth.service';
+
 import { Router } from '@angular/router';
 
 @Component({
@@ -10,23 +21,38 @@ import { Router } from '@angular/router';
   templateUrl: './user-dashboard.component.html',
   styleUrls: ['./user-dashboard.component.css']
 })
-export class UserDashboardComponent implements OnInit, OnDestroy {
+
+export class UserDashboardComponent
+implements OnInit, OnDestroy {
+
   private refreshInterval: any;
+
   user: any = null;
+
   users: User[] = [];
+
   loading = true;
+
   errorMsg = '';
 
   broadcastMessages: any[] = [];
+
   unreadAdminMessage: any = null;
+
   activeTab: string = 'notice';
 
   admin: User = {
+
     name: 'ADMIN USER',
+
     firstName: 'ADMIN',
+
     lastName: 'USER',
+
     email: 'admin@gmail.com',
+
     role: 'Admin',
+
     status: 'approved'
   };
 
@@ -35,140 +61,368 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef,
     private router: Router
   ) {}
+
   ngOnInit() {
+    // ✅ TAB LOCK SYSTEM
+    const email =
+      sessionStorage.getItem('email');
 
-    const email = sessionStorage.getItem('email');
+    if (email) {
 
-    if (!email) {
-      this.errorMsg = "Session expired. Please login again.";
+      // CREATE TAB ID
+      if (!sessionStorage.getItem('tabId')) {
+
+        sessionStorage.setItem(
+          'tabId',
+          crypto.randomUUID()
+        );
+
+      }
+
+      const tabId =
+        sessionStorage.getItem('tabId');
+
+      const storageKey =
+        `activeTab_${email}`;
+
+      const existingTab =
+        localStorage.getItem(storageKey);
+
+      // BLOCK SAME USER
+      if (
+        existingTab &&
+        existingTab !== tabId
+      ) {
+
+        alert(
+          'This user is already active in another tab'
+        );
+
+        sessionStorage.clear();
+
+        this.router.navigate(['/']);
+
+        return;
+      }
+
+      // REGISTER TAB
+      localStorage.setItem(
+        storageKey,
+        tabId || ''
+      );
+
+      // REMOVE LOCK ON CLOSE
+      window.addEventListener(
+        'beforeunload',
+        () => {
+
+          const active =
+            localStorage.getItem(storageKey);
+
+          if (active === tabId) {
+
+            localStorage.removeItem(storageKey);
+
+          }
+
+        }
+      );
+
+    }
+    // ✅ USER EMAIL
+    const currentEmail =
+      sessionStorage.getItem('email');
+
+    if (!currentEmail) {
+
+      this.errorMsg =
+        "Session expired. Please login again.";
+
       this.loading = false;
+
       this.cd.detectChanges();
+
       return;
     }
 
-    this.loadUser(email);
-    this.loadAllUsers(email);
+    // ✅ LOAD USER
+    this.loadUser(currentEmail);
 
-    // ✅ AUTO REFRESH ANNOUNCEMENTS
+    // ✅ LOAD OTHER USERS
+    this.loadAllUsers(currentEmail);
+
+    // ✅ AUTO REFRESH
     this.refreshInterval = setInterval(() => {
 
       if (this.user) {
+
         this.loadMessages();
+
       }
 
-    }, 3000); // every 3 seconds
+    }, 3000);
+
   }
+
   setTab(tab: string) {
+
     this.activeTab = tab;
+
   }
+
   ngOnDestroy() {
 
     if (this.refreshInterval) {
+
       clearInterval(this.refreshInterval);
+
     }
 
   }
 
+  // =========================
+  // LOAD CURRENT USER
+  // =========================
   loadUser(email: string) {
-    this.auth.getUserByEmail(email).subscribe({
-      next: (res: any) => {
 
-        this.user = {
-          name: (res.firstName || '') + ' ' + (res.lastName || ''),
-          email: res.email || res.Email,
-          role: res.role || res.Role,
-          status: (res.status || res.Status || '').toUpperCase()
-        };
+    this.auth.getUserByEmail(email)
+      .subscribe({
 
-        this.loadMessages();
+        next: (res: any) => {
 
-        this.loading = false;
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error("User load error:", err);
-        this.errorMsg = "Failed to load user";
-        this.loading = false;
-        this.cd.detectChanges();
-      }
-    });
+          this.user = {
+
+            name:
+              (res.firstName || '') +
+              ' ' +
+              (res.lastName || ''),
+
+            email:
+              res.email || res.Email,
+
+            role:
+              res.role || res.Role,
+
+            status:
+              (
+                res.status ||
+                res.Status ||
+                ''
+              ).toUpperCase()
+
+          };
+
+          this.loadMessages();
+
+          this.loading = false;
+
+          this.cd.detectChanges();
+
+        },
+
+        error: (err) => {
+
+          console.error(
+            "User load error:",
+            err
+          );
+
+          this.errorMsg =
+            "Failed to load user";
+
+          this.loading = false;
+
+          this.cd.detectChanges();
+
+        }
+
+      });
+
   }
-// 🔥 LOAD MESSAGES
-loadMessages() {
 
-  const email = this.user.email.toLowerCase();
+  // =========================
+  // LOAD NOTICE + PERSONAL MSG
+  // =========================
+  loadMessages() {
 
-  // ✅ Get ALL messages
-  this.auth.getAllMessages().subscribe({
-    next: (res: any[]) => {
+    const email =
+      this.user.email.toLowerCase();
 
-      // ✅ NOTICE BOARD
-      // Admin -> ALL only
-      this.broadcastMessages = res
-        .filter(m =>
-          m.senderEmail?.toLowerCase() === 'admin@gmail.com' &&
-          m.receiverEmail?.toLowerCase() === 'all'
-        )
-        .map(m => ({
-          ...m,
-          formattedTime: new Date(m.createdAt).toLocaleString()
-        }))
-        .sort((a, b) =>
-          new Date(b.createdAt).getTime() -
-          new Date(a.createdAt).getTime()
-        )
-        .slice(0, 4);
-      // ✅ PERSONAL ADMIN MESSAGE
-      const personalMessages = res.filter(m =>
-        m.senderEmail?.toLowerCase() === 'admin@gmail.com' &&
-        m.receiverEmail?.toLowerCase() === email
+    this.auth.getAllMessages()
+      .subscribe({
+
+        next: (res: any[]) => {
+
+          // ✅ NOTICE BOARD
+          this.broadcastMessages = res
+
+            .filter(m =>
+
+              m.senderEmail?.toLowerCase()
+              === 'admin@gmail.com'
+
+              &&
+
+              m.receiverEmail?.toLowerCase()
+              === 'all'
+            )
+
+            .map(m => ({
+
+              ...m,
+
+              formattedTime:
+                new Date(
+                  m.createdAt
+                ).toLocaleString()
+
+            }))
+
+            .sort((a, b) =>
+
+              new Date(b.createdAt)
+                .getTime()
+
+              -
+
+              new Date(a.createdAt)
+                .getTime()
+
+            )
+
+            .slice(0, 4);
+
+          // ✅ PERSONAL ADMIN MESSAGE
+          const personalMessages =
+            res.filter(m =>
+
+              m.senderEmail?.toLowerCase()
+              === 'admin@gmail.com'
+
+              &&
+
+              m.receiverEmail?.toLowerCase()
+              === email
+            );
+
+          this.unreadAdminMessage =
+
+            personalMessages.length > 0
+
+              ? personalMessages[
+                  personalMessages.length - 1
+                ]
+
+              : null;
+
+          this.cd.detectChanges();
+
+        },
+
+        error: (err) => {
+
+          console.error(
+            "Message load error",
+            err
+          );
+
+        }
+
+      });
+
+  }
+
+  // =========================
+  // LOGOUT
+  // =========================
+  logout() {
+
+    const email =
+      sessionStorage.getItem('email');
+
+    if (email) {
+
+      localStorage.removeItem(
+        `activeTab_${email}`
       );
 
-      this.unreadAdminMessage =
-        personalMessages.length > 0
-          ? personalMessages[personalMessages.length - 1]
-          : null;
-      console.log(this.broadcastMessages)
-      this.cd.detectChanges();
-    },
-
-    error: (err) => {
-      console.error("Message load error", err);
     }
-  });
-}
 
-  logout() {
-    // ✅ FIX: keep consistent
-    sessionStorage.clear();
+    this.auth.logout();
+
     this.router.navigate(['/']);
+
   }
 
-  // 🔥 FIXED USER LIST
+  // =========================
+  // LOAD OTHER USERS
+  // =========================
   loadAllUsers(currentEmail: string) {
-    this.auth.getUsers().subscribe({
-      next: (res: User[]) => {
 
-        this.users = res
-          .filter(u => u.email.toLowerCase() !== currentEmail.toLowerCase())
-          .map(u => ({
-            ...u,
-            name: u.name || (u.firstName + ' ' + u.lastName)
-          }));
+    this.auth.getUsers()
+      .subscribe({
 
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error("User list error:", err);
-      }
-    });
+        next: (res: User[]) => {
+
+          this.users = res
+
+            .filter(u =>
+
+              u.email.toLowerCase()
+
+              !==
+
+              currentEmail.toLowerCase()
+            )
+
+            .map(u => ({
+
+              ...u,
+
+              name:
+                u.name ||
+                (
+                  u.firstName +
+                  ' ' +
+                  u.lastName
+                )
+
+            }));
+
+          this.cd.detectChanges();
+
+        },
+
+        error: (err) => {
+
+          console.error(
+            "User list error:",
+            err
+          );
+
+        }
+
+      });
+
   }
 
+  // =========================
+  // MESSAGE USER
+  // =========================
   messageUser(user: User) {
-    // ✅ FIX: use sessionStorage
-    sessionStorage.setItem('chatUser', user.email);
-    sessionStorage.setItem('chatUserName', user.name || user.email);
+
+    sessionStorage.setItem(
+      'chatUser',
+      user.email
+    );
+
+    sessionStorage.setItem(
+      'chatUserName',
+      user.name || user.email
+    );
 
     this.router.navigate(['/chat']);
+
   }
+
 }

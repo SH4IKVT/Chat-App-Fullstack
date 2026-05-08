@@ -42,6 +42,6 @@ export class AuthService {
   }
 
   logout() {
-    sessionStorage.clear(); // Clears only this tab's session
-  }
+      sessionStorage.clear();
+    }
 }

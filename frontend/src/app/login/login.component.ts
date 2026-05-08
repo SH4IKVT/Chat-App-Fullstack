@@ -15,7 +15,7 @@ import { ChangeDetectorRef } from '@angular/core';
 export class LoginComponent {
   showError = false;
   showSuccess = false;
-  loginData = { email: '', password: '', role: 'User' };
+  loginData = { email: '', password: ''};
   successMsg = '';
   errorMsg = '';
   loading = false;
@@ -37,7 +37,6 @@ export class LoginComponent {
         
         // FIXED: Using sessionStorage instead of localStorage
         sessionStorage.setItem('token', res.token);
-        sessionStorage.setItem('sessionId', res.sessionId);
         sessionStorage.setItem('email', res.email);
         sessionStorage.setItem('role', res.role);
 

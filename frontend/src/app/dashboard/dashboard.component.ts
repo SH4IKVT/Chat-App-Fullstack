@@ -45,8 +45,72 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    // ✅ TAB LOCK SYSTEM
+    const email =
+      sessionStorage.getItem('email');
 
-    this.loadUsers();
+    if (email) {
+
+      // CREATE TAB ID
+      if (!sessionStorage.getItem('tabId')) {
+
+        sessionStorage.setItem(
+          'tabId',
+          crypto.randomUUID()
+        );
+
+      }
+
+      const tabId =
+        sessionStorage.getItem('tabId');
+
+      const storageKey =
+        `activeTab_${email}`;
+
+      const existingTab =
+        localStorage.getItem(storageKey);
+
+      // BLOCK SAME USER
+      if (
+        existingTab &&
+        existingTab !== tabId
+      ) {
+
+        alert(
+          'This user is already active in another tab'
+        );
+
+        sessionStorage.clear();
+
+        this.router.navigate(['/']);
+
+        return;
+      }
+
+      // REGISTER TAB
+      localStorage.setItem(
+        storageKey,
+        tabId || ''
+      );
+
+      // REMOVE LOCK ON CLOSE
+      window.addEventListener(
+        'beforeunload',
+        () => {
+
+          const active =
+            localStorage.getItem(storageKey);
+
+          if (active === tabId) {
+
+            localStorage.removeItem(storageKey);
+
+          }
+
+        }
+      );
+
+    }
 
     // ✅ LOAD USERS FOR MULTI SELECT
     this.auth.getUsers().subscribe({
@@ -59,7 +123,8 @@ export class DashboardComponent implements OnInit {
         this.cd.detectChanges();
       }
     });
-
+    // ✅ LOAD USERS
+    this.loadUsers();
     // ✅ LOAD NOTICE CHAT
     this.loadNoticeMessages();
 
@@ -331,10 +396,23 @@ export class DashboardComponent implements OnInit {
   }
 
   logout() {
-    this.auth.logout(); // Clears sessionStorage
-    this.router.navigate(['/']);
-  }
 
+    const email =
+      sessionStorage.getItem('email');
+
+    if (email) {
+
+      localStorage.removeItem(
+        `activeTab_${email}`
+      );
+
+    }
+
+    this.auth.logout();
+
+    this.router.navigate(['/']);
+
+  }
   messageUser(email: string) {
     sessionStorage.setItem('chatUser', email);
     this.router.navigate(['/chat']);

@@ -14,4 +14,8 @@ namespace ChatApplication.Models
         // 🔥 NEW FIELD
         public string SessionId { get; set; } = "";
     }
+    public class LogoutRequest
+    {
+        public string Email { get; set; } = "";
+    }
 }
