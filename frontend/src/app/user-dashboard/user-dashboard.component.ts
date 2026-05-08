@@ -26,6 +26,8 @@ export class UserDashboardComponent
 implements OnInit, OnDestroy {
 
   private refreshInterval: any;
+  // ✅ USER TAB TIMEOUT
+  private userTimeout: any = null;
 
   user: any = null;
 
@@ -122,62 +124,52 @@ implements OnInit, OnDestroy {
           if (active === tabId) {
 
             localStorage.removeItem(storageKey);
-
           }
-
         }
       );
-
     }
     // ✅ USER EMAIL
     const currentEmail =
       sessionStorage.getItem('email');
-
     if (!currentEmail) {
-
       this.errorMsg =
         "Session expired. Please login again.";
-
       this.loading = false;
-
       this.cd.detectChanges();
-
       return;
     }
-
     // ✅ LOAD USER
     this.loadUser(currentEmail);
-
     // ✅ LOAD OTHER USERS
     this.loadAllUsers(currentEmail);
-
     // ✅ AUTO REFRESH
     this.refreshInterval = setInterval(() => {
-
       if (this.user) {
-
         this.loadMessages();
-
       }
-
     }, 3000);
-
   }
-
-  setTab(tab: string) {
-
-    this.activeTab = tab;
-
+setTab(tab: string) {
+  this.activeTab = tab;
+  // ✅ CLEAR OLD TIMER
+  if (this.userTimeout) {
+    clearTimeout(this.userTimeout);
   }
+  // ✅ F TAB TIMEOUT
+  if (tab === 'users') {
+    this.userTimeout = setTimeout(() => {
+      alert(
+        '20 second session timeout for F tab'
+      );
+      this.logout();
+    }, 20000);
+  }
+}
 
   ngOnDestroy() {
-
     if (this.refreshInterval) {
-
       clearInterval(this.refreshInterval);
-
     }
-
   }
 
   // =========================
