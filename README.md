@@ -338,21 +338,230 @@ Recommended screenshots:
 
 ---
 
-# 📸 Example Markdown for Images
+# 🖼️ Application UI Screenshots
 
-```md
-## Login Page
+---
 
-![Login](README_IMAGES/login.png)
+# 🔐 Login Page
 
-## Admin Dashboard
+Features:
+- JWT Authentication
+- Secure Login
+- Role-based Dashboard Routing
+- Responsive UI
+
+![Login Page](README_IMAGES/login-page.png)
+
+---
+
+# 📝 Signup Page
+
+Features:
+- User Registration
+- Confirm Password Validation
+- Admin Approval Workflow
+- Responsive Form Design
+
+![Signup Page](README_IMAGES/signup-page.png)
+
+---
+
+# 👨‍💼 Admin Dashboard
+
+Features:
+- User Management
+- Notice Board
+- Notice Messaging
+- Multi-user Messaging
+- Analytics Access
+- Session Timeout Monitoring
 
 ![Admin Dashboard](README_IMAGES/admin-dashboard.png)
 
-## User Dashboard
+---
+
+# 👥 User List Tab
+
+Features:
+- Approve/Reject Users
+- User Information Table
+- Status Management
+- Protected Admin Controls
+
+![User List](README_IMAGES/user-list.png)
+
+---
+
+# 📢 Notice Board
+
+Features:
+- Broadcast Announcements
+- Realtime Updates
+- Admin-to-All Messaging
+- Scrollable Chat Interface
+
+![Notice Board](README_IMAGES/notice-board.png)
+
+---
+
+# 💬 Notice Messaging System
+
+Features:
+- Multi-user Selection
+- Admin Messaging
+- Group Message Display
+- Dynamic Chat Updates
+
+![Notice Messaging](README_IMAGES/notice-messaging.png)
+
+---
+
+# 👤 User Dashboard
+
+Features:
+- User Profile
+- Admin Profile
+- Notice Board
+- Other Users List
+- Secure Session Handling
 
 ![User Dashboard](README_IMAGES/user-dashboard.png)
-```
+
+---
+
+# 👥 Other Users Tab
+
+Features:
+- User Discovery
+- Start Private Chat
+- Protected User Access
+- Responsive Card Layout
+
+![Other Users](README_IMAGES/other-users.png)
+
+---
+
+# 💬 Real-Time Chat System
+
+Features:
+- SignalR Real-Time Communication
+- RSA Encrypted Messaging
+- Chat History
+- Dynamic Message Loading
+- Scrollable Chat UI
+
+![Chat System](README_IMAGES/chat-system.png)
+
+---
+
+# 📊 Analytics Dashboard
+
+Features:
+- User Statistics
+- Message Analytics
+- Realtime Analytics
+- Tab-based Analytics UI
+- Styled Data Tables
+
+![Analytics Dashboard](README_IMAGES/analytics-dashboard.png)
+
+---
+
+# 🥧 Pie Chart Analytics
+
+Features:
+- User Distribution
+- Message Statistics
+- Dynamic Chart Rendering
+- Responsive Chart Layout
+
+![Pie Chart Analytics](README_IMAGES/pie-chart.png)
+
+---
+
+# 📈 Message Analytics
+
+Features:
+- Message Count Tracking
+- User Messaging Analysis
+- Admin/User Statistics
+- Dynamic Data Visualization
+
+![Message Analytics](README_IMAGES/message-analytics.png)
+
+---
+
+# 📋 Message History Table
+
+Features:
+- Scrollable Table
+- Message Logs
+- Sender/Receiver Tracking
+- Timestamp Display
+- Styled Analytics Table
+
+![Message History](README_IMAGES/message-history.png)
+
+---
+
+# 📑 Users Data Table
+
+Features:
+- User Information
+- Role Tracking
+- Status Monitoring
+- Responsive Table Design
+
+![Users Data Table](README_IMAGES/users-table.png)
+
+---
+
+# 🔒 Session Protection System
+
+Features:
+- Single Active Tab Restriction
+- Backend Session Validation
+- ActiveTabId Validation
+- Unauthorized Session Blocking
+
+![Session Protection](README_IMAGES/session-protection.png)
+
+---
+
+# ⏳ Inactivity Timeout System
+
+Features:
+- 20-second inactivity timeout
+- Protected monitored tabs
+- Automatic logout
+- Timeout reset on activity
+
+![Timeout System](README_IMAGES/timeout-system.png)
+
+---
+
+# ⚡ SignalR Real-Time Messaging
+
+Features:
+- Instant message delivery
+- Live chat updates
+- Real-time dashboard refresh
+- WebSocket communication
+
+![SignalR](README_IMAGES/signalr-chat.png)
+
+---
+
+# 🔐 RSA Encryption Workflow
+
+Features:
+- Message encryption before storage
+- Secure PostgreSQL storage
+- Message decryption on retrieval
+
+![RSA Encryption](README_IMAGES/rsa-encryption.png)
+
+---
 
 ---
 
@@ -361,7 +570,8 @@ Recommended screenshots:
 # 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
+git clone https://github.com/SH4IKVT/The-Chat-App.git
+
 ```
 
 ---
