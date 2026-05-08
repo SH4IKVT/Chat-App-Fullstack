@@ -3,6 +3,7 @@ using Npgsql;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
+using ChatApplication.Models;
 
 [ApiController]
 [Route("api/messages")]
@@ -14,83 +15,261 @@ public class MessageController : ControllerBase
 
     private readonly IHubContext<ChatHub> _hub;
 
-    public MessageController(IHubContext<ChatHub> hub)
+    private readonly HttpClient _http;
+
+    public MessageController(
+        IHubContext<ChatHub> hub
+    )
     {
         _hub = hub;
+
+        _http = new HttpClient();
+
+        var byteArray =
+            System.Text.Encoding.ASCII.GetBytes(
+                "admin:admin123"
+            );
+
+        _http.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers
+            .AuthenticationHeaderValue(
+                "Basic",
+                Convert.ToBase64String(byteArray)
+            );
     }
-    [HttpPost("send")]
-    public async Task<IActionResult> Send([FromBody] Message msg)
+
+    // ===========================
+    // VALIDATE TAB ACCESS
+    // ===========================
+    private async Task<bool>
+    ValidateTabAccess()
     {
-        using var con = new NpgsqlConnection(conn);
+        try
+        {
+            var email =
+                User.Identity?.Name;
+
+            // ✅ ADMIN ALLOWED
+            if (
+                string.IsNullOrEmpty(email)
+                ||
+                email == "admin@gmail.com"
+            )
+            {
+                return true;
+            }
+
+            var currentTabId =
+                Request.Headers["X-Tab-Id"]
+                .ToString();
+
+            var response =
+                await _http.GetAsync(
+                    $"http://localhost:5984/userdb/{email}"
+                );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return false;
+            }
+
+            var data =
+                await response.Content
+                .ReadAsStringAsync();
+
+            var user =
+                JsonSerializer.Deserialize<User>(
+                    data
+                );
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            return
+                user.ActiveTabId ==
+                currentTabId;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    // ===========================
+    // SEND MESSAGE
+    // ===========================
+    [HttpPost("send")]
+    public async Task<IActionResult>
+    Send([FromBody] Message msg)
+    {
+        // ✅ BLOCK COPIED TAB
+        if (!await ValidateTabAccess())
+        {
+            return Unauthorized(new
+            {
+                message =
+                "Session already active in another tab"
+            });
+        }
+
+        using var con =
+            new NpgsqlConnection(conn);
+
         con.Open();
 
-        var query = @"INSERT INTO messages
-                    (sender_email, receiver_email, message)
-                    VALUES (@s, @r, @m)";
+        var query = @"
+        INSERT INTO messages
+        (
+            sender_email,
+            receiver_email,
+            message
+        )
+        VALUES (@s, @r, @m)";
 
-        using var cmd = new NpgsqlCommand(query, con);
+        using var cmd =
+            new NpgsqlCommand(query, con);
 
-        cmd.Parameters.AddWithValue("s", msg.SenderEmail);
-        cmd.Parameters.AddWithValue("r", msg.ReceiverEmail);
+        cmd.Parameters.AddWithValue(
+            "s",
+            msg.SenderEmail
+        );
 
-        var encryptedMsg = RsaService.Encrypt(msg.Text);
+        cmd.Parameters.AddWithValue(
+            "r",
+            msg.ReceiverEmail
+        );
 
-        cmd.Parameters.AddWithValue("m", encryptedMsg);
+        var encryptedMsg =
+            RsaService.Encrypt(msg.Text);
+
+        cmd.Parameters.AddWithValue(
+            "m",
+            encryptedMsg
+        );
 
         cmd.ExecuteNonQuery();
 
-        // ✅ SIGNALR REALTIME EVENT
-        await _hub.Clients.All.SendAsync("ReceiveMessage", new
-        {
-            senderEmail = msg.SenderEmail,
-            receiverEmail = msg.ReceiverEmail,
-            text = msg.Text,
-            createdAt = DateTime.Now
-        });
+        // ✅ SIGNALR REALTIME
+        await _hub.Clients.All.SendAsync(
+            "ReceiveMessage",
+            new
+            {
+                senderEmail =
+                    msg.SenderEmail,
 
-        return Ok(new { message = "Saved" });
+                receiverEmail =
+                    msg.ReceiverEmail,
+
+                text =
+                    msg.Text,
+
+                createdAt =
+                    DateTime.Now
+            }
+        );
+
+        return Ok(new
+        {
+            message = "Saved"
+        });
     }
 
-    [AllowAnonymous]
+    // ===========================
+    // ALL MESSAGES
+    // ===========================
     [HttpGet("all")]
-    public IActionResult GetAllMessages()
+    public async Task<IActionResult>
+    GetAllMessages()
     {
-        using var con = new NpgsqlConnection(conn);
+        // ✅ BLOCK COPIED TAB
+        if (!await ValidateTabAccess())
+        {
+            return Unauthorized(new
+            {
+                message =
+                "Session already active in another tab"
+            });
+        }
+
+        using var con =
+            new NpgsqlConnection(conn);
+
         con.Open();
 
-        var query = "SELECT * FROM messages ORDER BY created_at DESC";
+        var query =
+            "SELECT * FROM messages ORDER BY created_at DESC";
 
-        using var cmd = new NpgsqlCommand(query, con);
-        using var reader = cmd.ExecuteReader();
+        using var cmd =
+            new NpgsqlCommand(query, con);
 
-        var list = new List<object>();
+        using var reader =
+            cmd.ExecuteReader();
+
+        var list =
+            new List<object>();
 
         while (reader.Read())
         {
             list.Add(new
             {
-                id = reader.GetInt32(0),
-                senderEmail = reader.GetString(1),
-                receiverEmail = reader.GetString(2),
-                text = RsaService.Decrypt(reader.GetString(3)),
-                createdAt = reader.GetDateTime(4)
+                id =
+                    reader.GetInt32(0),
+
+                senderEmail =
+                    reader.GetString(1),
+
+                receiverEmail =
+                    reader.GetString(2),
+
+                text =
+                    RsaService.Decrypt(
+                        reader.GetString(3)
+                    ),
+
+                createdAt =
+                    reader.GetDateTime(4)
             });
         }
+
         return Ok(list);
     }
 
+    // ===========================
+    // CHAT BETWEEN USERS
+    // ===========================
     [HttpGet("{u1}/{u2}")]
-    public IActionResult GetMessages(string u1, string u2)
+    public async Task<IActionResult>
+    GetMessages(
+        string u1,
+        string u2
+    )
     {
-        u1 = Uri.UnescapeDataString(u1);
-        u2 = Uri.UnescapeDataString(u2);
+        // ✅ BLOCK COPIED TAB
+        if (!await ValidateTabAccess())
+        {
+            return Unauthorized(new
+            {
+                message =
+                "Session already active in another tab"
+            });
+        }
 
-        using var con = new NpgsqlConnection(conn);
+        u1 =
+            Uri.UnescapeDataString(u1);
+
+        u2 =
+            Uri.UnescapeDataString(u2);
+
+        using var con =
+            new NpgsqlConnection(conn);
+
         con.Open();
 
         string query;
 
-        // ✅ CASE 1: Broadcast chat
+        // ✅ BROADCAST
         if (u2.ToLower() == "all")
         {
             query = @"
@@ -100,37 +279,66 @@ public class MessageController : ControllerBase
         }
         else
         {
-            // ✅ CASE 2: Normal 1-to-1 chat ONLY
+            // ✅ NORMAL CHAT
             query = @"
             SELECT * FROM messages
-            WHERE 
-                (sender_email = @u1 AND receiver_email = @u2)
+            WHERE
+                (
+                    sender_email = @u1
+                    AND
+                    receiver_email = @u2
+                )
                 OR
-                (sender_email = @u2 AND receiver_email = @u1)
+                (
+                    sender_email = @u2
+                    AND
+                    receiver_email = @u1
+                )
             ORDER BY created_at ASC";
         }
 
-        using var cmd = new NpgsqlCommand(query, con);
+        using var cmd =
+            new NpgsqlCommand(query, con);
 
         if (u2.ToLower() != "all")
         {
-            cmd.Parameters.AddWithValue("u1", u1);
-            cmd.Parameters.AddWithValue("u2", u2);
+            cmd.Parameters.AddWithValue(
+                "u1",
+                u1
+            );
+
+            cmd.Parameters.AddWithValue(
+                "u2",
+                u2
+            );
         }
 
-        using var reader = cmd.ExecuteReader();
+        using var reader =
+            cmd.ExecuteReader();
 
-        var list = new List<object>();
+        var list =
+            new List<object>();
 
         while (reader.Read())
         {
             list.Add(new
             {
-                id = reader.GetInt32(0),
-                senderEmail = reader.GetString(1),
-                receiverEmail = reader.GetString(2),
-                text = RsaService.Decrypt(reader.GetString(3)),
-                createdAt = reader.GetDateTime(4)
+                id =
+                    reader.GetInt32(0),
+
+                senderEmail =
+                    reader.GetString(1),
+
+                receiverEmail =
+                    reader.GetString(2),
+
+                text =
+                    RsaService.Decrypt(
+                        reader.GetString(3)
+                    ),
+
+                createdAt =
+                    reader.GetDateTime(4)
             });
         }
 

@@ -16,9 +16,24 @@ export class AuthService {
   private msgUrl = 'http://localhost:5119/api/messages';
 
   constructor(private http: HttpClient) {}
-
   signup(data: any) { return this.http.post(`${this.baseUrl}/signup`, data); }
-  login(data: any) { return this.http.post(`${this.baseUrl}/login`, data); }
+  login(data: any) {
+    const tabId =
+      crypto.randomUUID();
+    sessionStorage.setItem(
+      'tabId',
+      tabId
+    );
+    return this.http.post(
+      `${this.baseUrl}/login`,
+      data,
+      {
+        headers: {
+          'X-Tab-Id': tabId
+        }
+      }
+    );
+  }
   getUsers() { return this.http.get<User[]>(`${this.baseUrl}/users`); }
   approve(email: string) { return this.http.post(`${this.baseUrl}/approve`, { email }); }
   reject(email: string) { return this.http.post(`${this.baseUrl}/reject`, { email }); }
@@ -40,8 +55,29 @@ export class AuthService {
   getToken() {
     return sessionStorage.getItem('token');
   }
+  serverLogout(email: string) {
 
+    return this.http.post(
+      `${this.baseUrl}/logout`,
+      { email }
+    );
+
+  }
   logout() {
+    const email =
+      sessionStorage.getItem('email');
+    if (email) {
+      this.serverLogout(email)
+        .subscribe({
+          next: () => {
+            sessionStorage.clear();
+          },
+          error: () => {
+            sessionStorage.clear();
+          }
+        });
+    } else {
       sessionStorage.clear();
     }
+  }
 }

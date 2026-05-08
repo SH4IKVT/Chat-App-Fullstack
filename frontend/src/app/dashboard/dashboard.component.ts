@@ -11,7 +11,13 @@ import { SignalrService } from '../services/signalr.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
+  host: {
+    '(mousemove)': 'resetAdminTimeout()',
+    '(keydown)': 'resetAdminTimeout()',
+    '(click)': 'resetAdminTimeout()',
+    '(wheel)': 'resetAdminTimeout()'
+  }
 })
 export class DashboardComponent implements OnInit {
   role = '';
@@ -139,25 +145,61 @@ export class DashboardComponent implements OnInit {
 
     this.activeTab = tab;
 
-    // ✅ CLEAR OLD TIMER
+    // ✅ START TIMER ONLY FOR A TAB
+    if (tab === 'users') {
+
+      this.startAdminTimeout();
+
+    }
+    else {
+
+      this.clearAdminTimeout();
+
+    }
+
+  }
+  // =========================
+  // START ADMIN TIMEOUT
+  // =========================
+  startAdminTimeout() {
+
+    this.clearAdminTimeout();
+
+    this.adminTimeout = setTimeout(() => {
+
+      alert(
+        '20 seconds inactivity timeout in A Tab'
+      );
+
+      this.logout();
+
+    }, 20000);
+
+  }
+
+  // =========================
+  // CLEAR ADMIN TIMEOUT
+  // =========================
+  clearAdminTimeout() {
+
     if (this.adminTimeout) {
 
       clearTimeout(this.adminTimeout);
 
+      this.adminTimeout = null;
+
     }
 
-    // ✅ A TAB TIMEOUT
-    if (tab === 'users') {
+  }
 
-      this.adminTimeout = setTimeout(() => {
+  // =========================
+  // RESET ADMIN TIMEOUT
+  // =========================
+  resetAdminTimeout() {
 
-        alert(
-          '20 second session timeout for A tab'
-        );
+    if (this.activeTab === 'users') {
 
-        this.logout();
-
-      }, 20000);
+      this.startAdminTimeout();
 
     }
 
@@ -187,6 +229,7 @@ export class DashboardComponent implements OnInit {
     const user = this.users.find(u => u.email.toLowerCase().trim() === cleanEmail);
     return user ? user.name : email;
   }
+
   loadUsers() {
     this.loading = true;
     this.auth.getUsers().subscribe({
@@ -345,4 +388,11 @@ export class DashboardComponent implements OnInit {
   approve(email: string) { this.auth.approve(email).subscribe(() => this.loadUsers()); }
   messageAll() { sessionStorage.setItem('chatUser', 'ALL'); this.router.navigate(['/chat']); }
   goAnalyticsSection() { this.router.navigate(['/analytics']); }
+  ngOnDestroy() {
+
+  if (this.adminTimeout) {
+      clearTimeout(this.adminTimeout);
+    }
+
+  }
 }

@@ -8,12 +8,21 @@ HttpInterceptorFn = (req, next) => {
   const token =
     sessionStorage.getItem('token');
 
+  const tabId =
+    sessionStorage.getItem('tabId');
+
   if (token) {
 
     const cloned = req.clone({
 
       setHeaders: {
-        Authorization: `Bearer ${token}`
+
+        Authorization:
+          `Bearer ${token}`,
+
+        'X-Tab-Id':
+          tabId || ''
+
       }
 
     });

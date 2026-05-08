@@ -12,7 +12,7 @@ namespace ChatApplication.Models
         public DateTime CreatedAt { get; set; }
 
         // 🔥 NEW FIELD
-        public string SessionId { get; set; } = "";
+        public string ActiveTabId { get; set; } = "";
     }
     public class LogoutRequest
     {

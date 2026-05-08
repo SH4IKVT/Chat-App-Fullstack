@@ -19,7 +19,13 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './user-dashboard.component.html',
-  styleUrls: ['./user-dashboard.component.css']
+  styleUrls: ['./user-dashboard.component.css'],
+  host: {
+    '(mousemove)': 'resetUserTimeout()',
+    '(keydown)': 'resetUserTimeout()',
+    '(click)': 'resetUserTimeout()',
+    '(wheel)': 'resetUserTimeout()'
+  }
 })
 
 export class UserDashboardComponent
@@ -149,27 +155,55 @@ implements OnInit, OnDestroy {
       }
     }, 3000);
   }
-setTab(tab: string) {
-  this.activeTab = tab;
-  // ✅ CLEAR OLD TIMER
-  if (this.userTimeout) {
-    clearTimeout(this.userTimeout);
+  setTab(tab: string) {
+    this.activeTab = tab;
+    // ✅ START TIMER ONLY FOR F TAB
+    if (tab === 'users') {
+      this.startUserTimeout();
+    }
+    else {
+      this.clearUserTimeout();
+    }
   }
-  // ✅ F TAB TIMEOUT
-  if (tab === 'users') {
+  // =========================
+  // START USER TIMEOUT
+  // =========================
+  startUserTimeout() {
+    this.clearUserTimeout();
     this.userTimeout = setTimeout(() => {
       alert(
-        '20 second session timeout for F tab'
+        '20 seconds inactivity timeout in F Tab'
       );
       this.logout();
     }, 20000);
   }
-}
+  // =========================
+  // CLEAR USER TIMEOUT
+  // =========================
+  clearUserTimeout() {
+    if (this.userTimeout) {
+      clearTimeout(this.userTimeout);
+      this.userTimeout = null;
+    }
+  }
+  // =========================
+  // RESET USER TIMEOUT
+  // =========================
+  resetUserTimeout() {
+
+    if (this.activeTab === 'users') {
+
+      this.startUserTimeout();
+
+    }
+
+  }
 
   ngOnDestroy() {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
+    this.clearUserTimeout();
   }
 
   // =========================
@@ -418,3 +452,4 @@ setTab(tab: string) {
   }
 
 }
+//

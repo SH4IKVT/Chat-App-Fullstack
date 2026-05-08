@@ -35,11 +35,10 @@ export class LoginComponent {
         this.showSuccess = true;
         this.successMsg = "Login successful!";
         
-        // FIXED: Using sessionStorage instead of localStorage
+        // ✅ UNIQUE TAB SESSION
         sessionStorage.setItem('token', res.token);
         sessionStorage.setItem('email', res.email);
         sessionStorage.setItem('role', res.role);
-
         this.cd.detectChanges();
         setTimeout(() => {
           if (res.role === 'Admin') {

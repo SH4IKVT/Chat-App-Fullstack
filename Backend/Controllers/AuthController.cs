@@ -33,7 +33,63 @@ namespace ChatApplication.Controllers
                     Convert.ToBase64String(byteArray)
                 );
         }
+        // ===========================
+        // VALIDATE ACTIVE TAB
+        // ===========================
+        private async Task<bool>
+        ValidateTabAccess()
+        {
+            try
+            {
+                var email =
+                    User.Identity?.Name;
 
+                if (
+                    string.IsNullOrEmpty(email)
+                    ||
+                    email == "admin@gmail.com"
+                )
+                {
+                    return true;
+                }
+
+                var currentTabId =
+                    Request.Headers["X-Tab-Id"]
+                    .ToString();
+
+                var response =
+                    await _http.GetAsync(
+                        $"http://localhost:5984/userdb/{email}"
+                    );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return false;
+                }
+
+                var data =
+                    await response.Content
+                    .ReadAsStringAsync();
+
+                var user =
+                    JsonSerializer.Deserialize<User>(
+                        data
+                    );
+
+                if (user == null)
+                {
+                    return false;
+                }
+
+                return
+                    user.ActiveTabId ==
+                    currentTabId;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         // ===========================
         // SIGNUP
         // ===========================
@@ -127,6 +183,10 @@ namespace ChatApplication.Controllers
                     await _http.GetAsync(
                         $"http://localhost:5984/userdb/{req.Email}"
                     );
+                // ✅ GET TAB ID FROM HEADER
+                var tabId =
+                    Request.Headers["X-Tab-Id"]
+                    .ToString();
 
                 // ===========================
                 // USER LOGIN
@@ -156,7 +216,46 @@ namespace ChatApplication.Controllers
                             "Invalid credentials"
                         });
                     }
+                    // ✅ BLOCK MULTIPLE TABS
+                    if (
+                        !string.IsNullOrEmpty(user.ActiveTabId)
+                        &&
+                        user.ActiveTabId != tabId
+                    )
+                    {
+                        return Unauthorized(new
+                        {
+                            message =
+                            "User already active in another tab"
+                        });
+                    }
 
+                    // ✅ SAVE ACTIVE TAB
+                    user.ActiveTabId = tabId;
+
+                    // UPDATE COUCHDB
+                    var doc =
+                        JsonDocument.Parse(data);
+
+                    var rev =
+                        doc.RootElement
+                        .GetProperty("_rev")
+                        .GetString();
+
+                    var updatedJson =
+                        JsonSerializer.Serialize(user);
+
+                    var content =
+                        new StringContent(
+                            updatedJson,
+                            Encoding.UTF8,
+                            "application/json"
+                        );
+
+                    await _http.PutAsync(
+                        $"http://localhost:5984/userdb/{user.Email}?rev={rev}",
+                        content
+                    );
                     if (user.Status != "approved")
                     {
                         return BadRequest(new
@@ -300,7 +399,72 @@ namespace ChatApplication.Controllers
                     });
             }
         }
+        // ===========================
+        // LOGOUT
+        // ===========================
+        [AllowAnonymous]
+        [HttpPost("logout")]
+        public async Task<IActionResult>
+        Logout([FromBody] LogoutRequest req)
+        {
+            try
+            {
+                if (req.Email == "admin@gmail.com")
+                {
+                    return Ok();
+                }
 
+                var response =
+                    await _http.GetAsync(
+                        $"http://localhost:5984/userdb/{req.Email}"
+                    );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return Ok();
+                }
+
+                var data =
+                    await response.Content
+                    .ReadAsStringAsync();
+
+                var user =
+                    JsonSerializer.Deserialize<User>(
+                        data
+                    );
+
+                var doc =
+                    JsonDocument.Parse(data);
+
+                var rev =
+                    doc.RootElement
+                    .GetProperty("_rev")
+                    .GetString();
+
+                user.ActiveTabId = "";
+
+                var updatedJson =
+                    JsonSerializer.Serialize(user);
+
+                var content =
+                    new StringContent(
+                        updatedJson,
+                        Encoding.UTF8,
+                        "application/json"
+                    );
+
+                await _http.PutAsync(
+                    $"http://localhost:5984/userdb/{req.Email}?rev={rev}",
+                    content
+                );
+
+                return Ok();
+            }
+            catch
+            {
+                return Ok();
+            }
+        }
         // ===========================
         // GET USER BY EMAIL
         // ===========================
@@ -530,6 +694,14 @@ namespace ChatApplication.Controllers
         public async Task<IActionResult>
         GetUsers()
         {
+            if (!await ValidateTabAccess())
+            {
+                return Unauthorized(new
+                {
+                    message =
+                    "Session already active in another tab"
+                });
+            }
             try
             {
                 return await FetchAllUsers();
