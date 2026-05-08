@@ -314,30 +314,6 @@ Process statistics
 Render charts/tables
 ```
 
----
-
-# 🖼️ Suggested README Images
-
-Add screenshots inside:
-
-```text
-README_IMAGES/
-```
-
-Recommended screenshots:
-
-* Login Page
-* Signup Page
-* Admin Dashboard
-* User Dashboard
-* Chat System
-* Notice Board
-* Analytics Dashboard
-* Multi-user Messaging
-* SignalR Realtime Chat
-
----
-
 # 🖼️ Application UI Screenshots
 
 ---
@@ -347,72 +323,72 @@ Recommended screenshots:
 Features:
 - JWT Authentication
 - Secure Login
-- Role-based Dashboard Routing
 - Responsive UI
+- Session-based Authentication
 
-![Login Page](README_IMAGES/login-page.png)
-
----
-
-# 📝 Signup Page
-
-Features:
-- User Registration
-- Confirm Password Validation
-- Admin Approval Workflow
-- Responsive Form Design
-
-![Signup Page](README_IMAGES/signup-page.png)
+![Login Page](images/login-page.png)
 
 ---
 
 # 👨‍💼 Admin Dashboard
 
 Features:
+- Admin Control Panel
 - User Management
 - Notice Board
 - Notice Messaging
+- Analytics Navigation
 - Multi-user Messaging
-- Analytics Access
-- Session Timeout Monitoring
 
-![Admin Dashboard](README_IMAGES/admin-dashboard.png)
+![Admin Dashboard](images/admin-dashboard.png)
 
 ---
 
-# 👥 User List Tab
+# 📢 Admin Notice Board
 
 Features:
-- Approve/Reject Users
-- User Information Table
-- Status Management
-- Protected Admin Controls
+- Broadcast Messaging
+- Admin-to-All Announcements
+- Realtime Notice Updates
+- Scrollable Notice Interface
 
-![User List](README_IMAGES/user-list.png)
-
----
-
-# 📢 Notice Board
-
-Features:
-- Broadcast Announcements
-- Realtime Updates
-- Admin-to-All Messaging
-- Scrollable Chat Interface
-
-![Notice Board](README_IMAGES/notice-board.png)
+![Admin Notice Board](images/admin-dashboard-notice.png)
 
 ---
 
-# 💬 Notice Messaging System
+# 💬 Admin Notice Messaging System
 
 Features:
 - Multi-user Selection
-- Admin Messaging
-- Group Message Display
-- Dynamic Chat Updates
+- Group Messaging
+- Realtime Chat Updates
+- Admin Messaging Interface
 
-![Notice Messaging](README_IMAGES/notice-messaging.png)
+![Admin Notice Messages](images/admin-dashboard-notice-messages.png)
+
+---
+
+# 📊 Analytics Dashboard
+
+Features:
+- Message Analytics
+- User Statistics
+- Realtime Data Visualization
+- Analytics Navigation Tabs
+
+![Analytics Dashboard](images/admin-analytics.png)
+
+---
+
+# 📈 Message Analytics Chart
+
+Features:
+- Message Statistics
+- Dynamic Chart Rendering
+- User Activity Visualization
+- Realtime Analytics Updates
+
+![Analytics Chart](images/admin-analytics-messagechart.png)
 
 ---
 
@@ -420,146 +396,84 @@ Features:
 
 Features:
 - User Profile
-- Admin Profile
 - Notice Board
-- Other Users List
+- Other Users Section
 - Secure Session Handling
+- Responsive Dashboard UI
 
-![User Dashboard](README_IMAGES/user-dashboard.png)
-
----
-
-# 👥 Other Users Tab
-
-Features:
-- User Discovery
-- Start Private Chat
-- Protected User Access
-- Responsive Card Layout
-
-![Other Users](README_IMAGES/other-users.png)
+![User Dashboard](images/user-dashboard.png)
 
 ---
 
-# 💬 Real-Time Chat System
-
-Features:
-- SignalR Real-Time Communication
-- RSA Encrypted Messaging
-- Chat History
-- Dynamic Message Loading
-- Scrollable Chat UI
-
-![Chat System](README_IMAGES/chat-system.png)
-
----
-
-# 📊 Analytics Dashboard
-
-Features:
-- User Statistics
-- Message Analytics
-- Realtime Analytics
-- Tab-based Analytics UI
-- Styled Data Tables
-
-![Analytics Dashboard](README_IMAGES/analytics-dashboard.png)
-
----
-
-# 🥧 Pie Chart Analytics
-
-Features:
-- User Distribution
-- Message Statistics
-- Dynamic Chart Rendering
-- Responsive Chart Layout
-
-![Pie Chart Analytics](README_IMAGES/pie-chart.png)
-
----
-
-# 📈 Message Analytics
-
-Features:
-- Message Count Tracking
-- User Messaging Analysis
-- Admin/User Statistics
-- Dynamic Data Visualization
-
-![Message Analytics](README_IMAGES/message-analytics.png)
-
----
-
-# 📋 Message History Table
-
-Features:
-- Scrollable Table
-- Message Logs
-- Sender/Receiver Tracking
-- Timestamp Display
-- Styled Analytics Table
-
-![Message History](README_IMAGES/message-history.png)
-
----
-
-# 📑 Users Data Table
+# 👥 User Profile Section
 
 Features:
 - User Information
-- Role Tracking
-- Status Monitoring
-- Responsive Table Design
+- Admin Profile
+- Dashboard Tabs
+- Responsive Card Layout
 
-![Users Data Table](README_IMAGES/users-table.png)
+![User Dashboard Profiles](images/user-dashboard-profiles.png)
 
 ---
 
-# 🔒 Session Protection System
+# 🔒 Security Features
 
-Features:
-- Single Active Tab Restriction
+Implemented Security:
+- JWT Authentication
+- RSA Message Encryption
 - Backend Session Validation
-- ActiveTabId Validation
-- Unauthorized Session Blocking
-
-![Session Protection](README_IMAGES/session-protection.png)
+- Single Active Tab Restriction
+- Inactivity Timeout
+- Protected APIs
+- BCrypt Password Hashing
 
 ---
 
-# ⏳ Inactivity Timeout System
+# ⚡ Real-Time Features
+
+Implemented using SignalR:
+- Instant Messaging
+- Live Notice Updates
+- Dynamic Dashboard Refresh
+- Realtime User Communication
+
+---
+
+# 🗄️ Database Architecture
+
+## PostgreSQL
+Stores:
+- Encrypted messages
+- Chat history
+- Broadcast notices
+
+## CouchDB
+Stores:
+- User data
+- User roles
+- Approval status
+- Session ownership
+
+---
+
+# ⏳ Session Timeout System
 
 Features:
 - 20-second inactivity timeout
 - Protected monitored tabs
-- Automatic logout
-- Timeout reset on activity
-
-![Timeout System](README_IMAGES/timeout-system.png)
+- Auto logout
+- Activity-based timer reset
 
 ---
 
-# ⚡ SignalR Real-Time Messaging
+# 🔐 Single Tab Restriction
 
 Features:
-- Instant message delivery
-- Live chat updates
-- Real-time dashboard refresh
-- WebSocket communication
-
-![SignalR](README_IMAGES/signalr-chat.png)
-
----
-
-# 🔐 RSA Encryption Workflow
-
-Features:
-- Message encryption before storage
-- Secure PostgreSQL storage
-- Message decryption on retrieval
-
-![RSA Encryption](README_IMAGES/rsa-encryption.png)
+- One active tab per user
+- Backend ActiveTabId validation
+- Session ownership validation
+- Unauthorized session blocking
 
 ---
 
